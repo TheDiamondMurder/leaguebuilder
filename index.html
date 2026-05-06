@@ -4,12 +4,13 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>League Table Creator</title>
+    <link rel="icon" type="image/png" href="assets/leaguebuilder-logo.png" />
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <section class="home-page page-view" id="homePage">
       <div class="home-inner">
-        <p class="eyebrow">League Table Creator v1.2</p>
+        <p class="eyebrow">League Table Creator v1.3</p>
         <h1>Build, manage, and share competition tables.</h1>
         <p>
           Create league pyramids, generate fixtures, track playoffs, handle season movement,
@@ -18,7 +19,22 @@
         <div class="home-actions">
           <button class="primary-button" id="enterCreatorButton" type="button">Open Creator</button>
           <button class="ghost-button" id="openChangelogButton" type="button">View Changelog</button>
+          <button class="ghost-button" id="openNewsButton" type="button">News</button>
         </div>
+      </div>
+    </section>
+
+    <section class="news-page page-view" id="newsPage" hidden>
+      <div class="changelog-inner">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">Developer posts</p>
+            <h2>News</h2>
+          </div>
+          <button class="ghost-button" id="newsBackHomeButton" type="button">Back Home</button>
+        </div>
+        <div id="newsList" class="news-list"></div>
+        <article id="newsArticle" class="news-article" hidden></article>
       </div>
     </section>
 
@@ -35,21 +51,33 @@
           <div class="changelog-card-head">
             <div>
               <p class="eyebrow">Current version</p>
-              <h3>v1.2</h3>
+              <h3>v1.3</h3>
             </div>
-            <span class="release-date">6th April 2026</span>
+            <span class="release-date">6th May 2026</span>
           </div>
           <ul>
-            <li>Reworked the league graphic rendering engine with a cleaner report-card style.</li>
-            <li>Added sharper 2x PNG export for rendered league graphics.</li>
-            <li>Improved playoff bracket viewing with H2H and form-based projections.</li>
-            <li>Added point deductions, season history, projections, and richer fixture views.</li>
+            <li>Added shareable league, fixture, and team links with QR codes.</li>
+            <li>Added news posts, season history, team history, and cleaner archive tools.</li>
+            <li>Expanded fixtures with calendar view, gameweek filters, bulk dates, and safer reset/delete warnings.</li>
+            <li>Added race, team, gameweek, playoff, and mobile-friendly graphic exports.</li>
+            <li>Improved playoffs, projections, deductions, dark mode, mobile controls, and validation messages.</li>
+          </ul>
+        </article>
+        <article class="changelog-card">
+          <div class="changelog-card-head">
+            <h3>v1.2</h3>
+            <span class="release-date">6th May 2026</span>
+          </div>
+          <ul>
+            <li>Reworked league graphic rendering.</li>
+            <li>Added projections, point deductions, season history, and richer fixture views.</li>
+            <li>Improved playoff bracket viewing.</li>
           </ul>
         </article>
         <article class="changelog-card">
           <div class="changelog-card-head">
             <h3>v1.1</h3>
-            <span class="release-date">4th April 2026</span>
+            <span class="release-date">4th May 2026</span>
           </div>
           <ul>
             <li>Added league rendering.</li>
@@ -60,7 +88,7 @@
         <article class="changelog-card">
           <div class="changelog-card-head">
             <h3>v1.0</h3>
-            <span class="release-date">3rd April 2026</span>
+            <span class="release-date">3rd May 2026</span>
           </div>
           <ul>
             <li>Initial release.</li>
@@ -72,7 +100,7 @@
     <div class="app-shell page-view" id="creatorPage" hidden>
       <aside class="sidebar" aria-label="Leagues">
         <div class="brand-block">
-          <div class="mark" aria-hidden="true">LT</div>
+          <img class="mark" src="assets/leaguebuilder-logo.png" alt="" aria-hidden="true" />
           <div>
             <h1>League Table Creator</h1>
             <p>Manage league groups, fixtures, tables, playoffs and movement.</p>
@@ -96,6 +124,16 @@
           Current season
           <input id="seasonNameInput" type="text" maxlength="50" />
         </label>
+        <div class="group-actions">
+          <label>
+            Starts
+            <input id="seasonStartInput" type="date" />
+          </label>
+          <label>
+            Ends
+            <input id="seasonEndInput" type="date" />
+          </label>
+        </div>
 
         <div class="sidebar-section">
           <div class="section-heading">
@@ -122,6 +160,7 @@
           <div class="topbar-actions">
             <button class="ghost-button" id="homeNavButton" type="button">Home</button>
             <button class="ghost-button" id="changelogNavButton" type="button">Changelog</button>
+            <button class="ghost-button" id="darkModeButton" type="button">Dark Mode</button>
             <button class="ghost-button" id="exportButton" type="button">Export JSON</button>
             <label class="file-button">
               Import JSON
@@ -177,18 +216,43 @@
                 Match point name
                 <input id="pointLabelInput" type="text" maxlength="24" placeholder="Goal" />
               </label>
+              <label>
+                Team colours
+                <select id="teamColorsInput">
+                  <option value="off">Off</option>
+                  <option value="on">On</option>
+                </select>
+              </label>
+            </div>
+            <div class="settings-actions">
+              <button class="ghost-button" id="resetKeepTeamsButton" type="button">Reset League, Keep Teams</button>
+              <button class="danger-button" id="resetAllButton" type="button">Reset League and Teams</button>
             </div>
           </section>
 
           <nav class="tabs" aria-label="League tools">
             <button class="tab-button active" data-view="editor" type="button">Editor</button>
+            <button class="tab-button" data-view="dashboard" type="button">Dashboard</button>
             <button class="tab-button" data-view="clean" type="button">Clean View</button>
             <button class="tab-button" data-view="fixtures" type="button">Fixtures</button>
             <button class="tab-button" data-view="playoffs" type="button">Playoffs</button>
             <button class="tab-button" data-view="bracket" type="button">Playoff Bracket</button>
             <button class="tab-button" data-view="projections" type="button">Projections</button>
             <button class="tab-button" data-view="deductions" type="button">Point Deductions</button>
+            <button class="tab-button" data-view="history" type="button">History</button>
+            <button class="tab-button" data-view="graphics" type="button">Graphics</button>
           </nav>
+
+          <section class="view-panel" id="dashboardView" hidden>
+            <div class="section-title-row">
+              <div>
+                <p class="eyebrow">Group overview</p>
+                <h3>Dashboard and Pyramid</h3>
+              </div>
+            </div>
+            <div id="groupDashboard" class="dashboard-grid"></div>
+            <div id="pyramidLadder" class="pyramid-ladder"></div>
+          </section>
 
           <section class="view-panel" id="editorView">
             <div class="section-title-row">
@@ -196,7 +260,10 @@
                 <p class="eyebrow">Table setup</p>
                 <h3>Teams and Positions</h3>
               </div>
-              <button class="secondary-button" id="addTeamButton" type="button">Add Team</button>
+              <div class="inline-actions">
+                <button class="secondary-button" id="bulkAddTeamsButton" type="button">Bulk Add</button>
+                <button class="secondary-button" id="addTeamButton" type="button">Add Team</button>
+              </div>
             </div>
             <div class="table-wrap">
               <table>
@@ -227,7 +294,15 @@
               </div>
               <div class="inline-actions">
                 <select id="cleanSeasonInput" aria-label="Clean view season"></select>
-                <button class="secondary-button" id="renderGraphicButton" type="button">Render Graphic</button>
+                <select id="shareModeInput" aria-label="Share mode">
+                  <option value="league">League only</option>
+                  <option value="leagueFixtures">League + fixtures</option>
+                  <option value="fixtures">Fixtures only</option>
+                  <option value="team">Team page</option>
+                </select>
+                <select id="shareTeamInput" aria-label="Share team"></select>
+                <button class="secondary-button" id="renderGraphicButton" type="button" hidden>Render Graphic</button>
+                <button class="secondary-button" id="generateShareCodeButton" type="button">Generate Share Code</button>
               </div>
             </div>
             <div id="cleanLegend" class="legend-list"></div>
@@ -253,6 +328,14 @@
               </table>
             </div>
             <div id="deductionNotes" class="deduction-notes"></div>
+            <div class="rewind-box">
+              <div>
+                <p class="eyebrow">Table rewind</p>
+                <h3>Before Gameweek</h3>
+              </div>
+              <select id="rewindGameweekInput" aria-label="Rewind gameweek"></select>
+              <div id="rewindTableBox" class="rewind-table-box"></div>
+            </div>
           </section>
 
           <section class="view-panel" id="fixturesView" hidden>
@@ -262,6 +345,10 @@
                 <h3>Fixtures and Results</h3>
               </div>
               <div class="inline-actions">
+                <select id="fixtureGameweekFilter" aria-label="Gameweek filter"></select>
+                <button class="ghost-button" id="applyGameweekDateButton" type="button">Set Gameweek Date</button>
+                <button class="ghost-button" id="fixtureCalendarButton" type="button">Calendar View</button>
+                <button class="secondary-button" id="renderGameweekButton" type="button">Render Gameweek</button>
                 <select id="fixtureModeInput" aria-label="Fixture mode">
                   <option value="single">One game</option>
                   <option value="double">Home and away</option>
@@ -273,6 +360,10 @@
               <label>
                 Gameweek
                 <input id="manualGameweekInput" type="number" min="1" step="1" value="1" />
+              </label>
+              <label>
+                Date
+                <input id="manualDateInput" type="date" />
               </label>
               <label>
                 Home team
@@ -297,6 +388,10 @@
                   </div>
                   <button class="secondary-button" id="autoPlayoffButton" type="button">Auto Matchups</button>
                 </div>
+                <label class="playoff-format-toggle">
+                  <input id="twoLegPlayoffInput" type="checkbox" />
+                  Two-leg promotion ties
+                </label>
                 <div id="playoffList" class="outcome-list"></div>
               </div>
               <div class="outcome-panel">
@@ -334,10 +429,16 @@
           <section class="view-panel" id="projectionsView" hidden>
             <div class="section-title-row">
               <div>
-                <p class="eyebrow">Next fixture scenarios</p>
-                <h3>Projections</h3>
+                <p class="eyebrow">Race centre</p>
+                <h3>Title, Promotion and Survival</h3>
               </div>
             </div>
+            <nav class="tabs race-tabs" aria-label="Race views">
+              <button class="tab-button active" data-race="title" type="button">Title</button>
+              <button class="tab-button" data-race="automatic" type="button">Automatic Promotion</button>
+              <button class="tab-button" data-race="playoff" type="button">Playoffs</button>
+              <button class="tab-button" data-race="survival" type="button">Relegation Battle</button>
+            </nav>
             <div id="projectionsList" class="projections-list"></div>
           </section>
 
@@ -350,9 +451,110 @@
             </div>
             <div id="deductionsList" class="deductions-list"></div>
           </section>
+
+          <section class="view-panel" id="historyView" hidden>
+            <div class="section-title-row">
+              <div>
+                <p class="eyebrow">Archive</p>
+                <h3>Season and Team History</h3>
+              </div>
+              <div class="inline-actions">
+                <select id="historySeasonInput" aria-label="History season"></select>
+                <select id="historyTeamInput" aria-label="History team"></select>
+              </div>
+            </div>
+            <div id="historyPanel" class="history-panel"></div>
+          </section>
+
+          <section class="view-panel" id="graphicsView" hidden>
+            <div class="section-title-row">
+              <div>
+                <p class="eyebrow">Exports</p>
+                <h3>Graphic Renderer</h3>
+              </div>
+              <select id="graphicFormatInput" aria-label="Graphic format">
+                <option value="default">Default</option>
+                <option value="story">Mobile Story</option>
+                <option value="square">Instagram Post</option>
+              </select>
+            </div>
+            <div class="graphics-controls">
+              <label>
+                Team
+                <select id="graphicTeamInput"></select>
+              </label>
+              <label>
+                Gameweek
+                <select id="graphicGameweekInput"></select>
+              </label>
+              <label>
+                Race
+                <select id="graphicRaceInput">
+                  <option value="title">Title Race</option>
+                  <option value="automatic">Automatic Promotion Race</option>
+                  <option value="playoff">Playoff Race</option>
+                  <option value="survival">Relegation Battle</option>
+                </select>
+              </label>
+            </div>
+            <div class="graphics-grid">
+              <button class="secondary-button" id="renderLeagueGraphic2Button" type="button">Render League Table</button>
+              <button class="secondary-button" id="renderPlayoffsGraphicButton" type="button">Render Playoffs</button>
+              <button class="secondary-button" id="renderTeamGraphicButton" type="button">Render Team Profile</button>
+              <button class="secondary-button" id="renderRaceGraphicButton" type="button">Render Race</button>
+              <button class="secondary-button" id="renderGameweekGraphic2Button" type="button">Render Gameweek</button>
+            </div>
+          </section>
         </div>
       </main>
     </div>
+
+    <main class="share-page page-view" id="sharePage" hidden>
+      <section class="shared-clean-card">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow" id="sharedSeasonName">Shared League</p>
+            <h2 id="sharedLeagueName">League Table</h2>
+          </div>
+        </div>
+        <nav class="tabs shared-tabs" aria-label="Shared league views">
+          <button class="tab-button active" id="sharedLeagueTab" type="button">League</button>
+          <button class="tab-button" id="sharedFixturesTab" type="button">Fixtures</button>
+          <button class="tab-button" id="sharedTeamTab" type="button">Team</button>
+        </nav>
+        <div id="sharedLeagueView">
+          <div id="sharedLegend" class="legend-list"></div>
+          <div class="table-wrap">
+            <table class="clean-table">
+              <thead>
+                <tr>
+                  <th class="rank-col">#</th>
+                  <th>Club</th>
+                  <th class="small-col">P</th>
+                  <th class="small-col">W</th>
+                  <th class="small-col">D</th>
+                  <th class="small-col">L</th>
+                  <th class="small-col">For</th>
+                  <th class="small-col">Ag</th>
+                  <th class="small-col">Diff</th>
+                  <th class="small-col">Pts</th>
+                  <th>Form</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="sharedTableBody"></tbody>
+            </table>
+          </div>
+          <div id="sharedDeductionNotes" class="deduction-notes"></div>
+        </div>
+        <div id="sharedFixturesView" hidden>
+          <div id="sharedFixturesList" class="fixtures-list shared-fixtures-list"></div>
+        </div>
+        <div id="sharedTeamView" hidden>
+          <div id="sharedTeamProfile" class="team-profile-card"></div>
+        </div>
+      </section>
+    </main>
 
     <dialog id="customDialog">
       <form method="dialog" class="dialog-body">
@@ -396,6 +598,55 @@
         </div>
       </form>
     </dialog>
+
+    <dialog id="bulkTeamsDialog">
+      <form method="dialog" class="dialog-body">
+        <h2>Bulk Add Teams</h2>
+        <label>
+          Team names
+          <textarea id="bulkTeamsInput" rows="10" placeholder="One team per line"></textarea>
+        </label>
+        <div class="dialog-actions">
+          <button class="ghost-button" value="cancel" type="submit">Cancel</button>
+          <button class="primary-button" value="save" type="submit">Add Teams</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="shareDialog">
+      <form method="dialog" class="dialog-body share-dialog-body">
+        <h2>Share Link</h2>
+        <img id="shareQrImage" alt="QR code for share link" class="share-qr" />
+        <label>
+          Link
+          <textarea id="shareLinkOutput" rows="4" readonly></textarea>
+        </label>
+        <div class="dialog-actions">
+          <button class="ghost-button" id="copyShareLinkButton" value="copy" type="button">Copy Link</button>
+          <button class="primary-button" value="close" type="submit">Done</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="gameweekDateDialog">
+      <form method="dialog" class="dialog-body">
+        <h2>Set Gameweek Date</h2>
+        <label>
+          Gameweek
+          <select id="gameweekDateSelect"></select>
+        </label>
+        <label>
+          Date
+          <input id="gameweekDateInput" type="date" />
+        </label>
+        <div class="dialog-actions">
+          <button class="ghost-button" value="cancel" type="submit">Cancel</button>
+          <button class="primary-button" value="save" type="submit">Apply Date</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div id="toastStack" class="toast-stack" aria-live="polite"></div>
 
     <script src="app.js"></script>
   </body>

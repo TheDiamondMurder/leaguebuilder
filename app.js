@@ -18,21 +18,96 @@ const state = {
   activeView: "editor",
   pendingCustomPosition: -1,
   activeCleanSeasonId: "current",
+  activeRaceView: "title",
+  fixtureFilter: "all",
+  fixtureCalendarMode: false,
+  cleanRewindWeek: "",
+  darkMode: false,
+  latestShareUrl: "",
 };
+
+const fallbackNewsPosts = [
+  {
+    slug: "v1-3",
+    title: "v1.3 is here",
+    coverPhoto: "announcements/image1.svg",
+    postDate: "2026-05-06",
+    content: [
+      {
+        type: "paragraph",
+        text: "Version 1.3 expands sharing, fixtures, graphics, history, and everyday league management.",
+      },
+      {
+        type: "heading",
+        text: "Highlights",
+      },
+      {
+        type: "list",
+        items: [
+          "Shareable league, fixture, and team pages with QR codes.",
+          "New graphic exports for teams, races, fixtures, playoffs, and mobile formats.",
+          "Season and team history, news posts, fixture dates, and cleaner controls.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "The app remains fully static and ready for GitHub Pages.",
+      },
+    ],
+  },
+  {
+    slug: "welcome",
+    title: "Welcome to League Table Creator",
+    coverPhoto: "announcements/image1.svg",
+    postDate: "2026-05-06",
+    content: [
+      {
+        type: "paragraph",
+        text: "Welcome to LeagueBuilder",
+      },
+      {
+        type: "heading",
+        text: "What is being worked on",
+      },
+      {
+        type: "list",
+        items: [
+          "Share links for league tables, fixtures, and team pages.",
+          "New graphic export formats for tables, races, teams, playoffs, and gameweeks.",
+          "Fixture dates, calendar views, and better gameweek tools.",
+          "Season history, team history, group dashboards, and pyramid views.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "The creator is now on v1.3.",
+      },
+    ],
+  },
+];
 
 const els = {
   homePage: document.querySelector("#homePage"),
   creatorPage: document.querySelector("#creatorPage"),
   changelogPage: document.querySelector("#changelogPage"),
+  newsPage: document.querySelector("#newsPage"),
+  sharePage: document.querySelector("#sharePage"),
   enterCreatorButton: document.querySelector("#enterCreatorButton"),
   openChangelogButton: document.querySelector("#openChangelogButton"),
+  openNewsButton: document.querySelector("#openNewsButton"),
   backHomeButton: document.querySelector("#backHomeButton"),
+  newsBackHomeButton: document.querySelector("#newsBackHomeButton"),
+  newsList: document.querySelector("#newsList"),
+  newsArticle: document.querySelector("#newsArticle"),
   homeNavButton: document.querySelector("#homeNavButton"),
   changelogNavButton: document.querySelector("#changelogNavButton"),
+  darkModeButton: document.querySelector("#darkModeButton"),
   groupSelect: document.querySelector("#groupSelect"),
   renameGroupButton: document.querySelector("#renameGroupButton"),
   deleteGroupButton: document.querySelector("#deleteGroupButton"),
   seasonNameInput: document.querySelector("#seasonNameInput"),
+  seasonStartInput: document.querySelector("#seasonStartInput"),
+  seasonEndInput: document.querySelector("#seasonEndInput"),
   leagueGroupInput: document.querySelector("#leagueGroupInput"),
   leagueList: document.querySelector("#leagueList"),
   tierList: document.querySelector("#tierList"),
@@ -54,14 +129,31 @@ const els = {
   promotesToInput: document.querySelector("#promotesToInput"),
   relegatesToInput: document.querySelector("#relegatesToInput"),
   pointLabelInput: document.querySelector("#pointLabelInput"),
+  teamColorsInput: document.querySelector("#teamColorsInput"),
+  resetKeepTeamsButton: document.querySelector("#resetKeepTeamsButton"),
+  resetAllButton: document.querySelector("#resetAllButton"),
   addTeamButton: document.querySelector("#addTeamButton"),
+  bulkAddTeamsButton: document.querySelector("#bulkAddTeamsButton"),
   teamTableBody: document.querySelector("#teamTableBody"),
   cleanLeagueName: document.querySelector("#cleanLeagueName"),
   cleanSeasonInput: document.querySelector("#cleanSeasonInput"),
+  shareModeInput: document.querySelector("#shareModeInput"),
+  shareTeamInput: document.querySelector("#shareTeamInput"),
   renderGraphicButton: document.querySelector("#renderGraphicButton"),
+  generateShareCodeButton: document.querySelector("#generateShareCodeButton"),
   cleanLegend: document.querySelector("#cleanLegend"),
   cleanTableBody: document.querySelector("#cleanTableBody"),
+  rewindGameweekInput: document.querySelector("#rewindGameweekInput"),
+  rewindTableBox: document.querySelector("#rewindTableBox"),
   fixtureModeInput: document.querySelector("#fixtureModeInput"),
+  fixtureGameweekFilter: document.querySelector("#fixtureGameweekFilter"),
+  applyGameweekDateButton: document.querySelector("#applyGameweekDateButton"),
+  gameweekDateDialog: document.querySelector("#gameweekDateDialog"),
+  gameweekDateSelect: document.querySelector("#gameweekDateSelect"),
+  gameweekDateInput: document.querySelector("#gameweekDateInput"),
+  fixtureCalendarButton: document.querySelector("#fixtureCalendarButton"),
+  renderGameweekButton: document.querySelector("#renderGameweekButton"),
+  manualDateInput: document.querySelector("#manualDateInput"),
   manualGameweekInput: document.querySelector("#manualGameweekInput"),
   manualHomeInput: document.querySelector("#manualHomeInput"),
   manualAwayInput: document.querySelector("#manualAwayInput"),
@@ -74,6 +166,7 @@ const els = {
   movementPreview: document.querySelector("#movementPreview"),
   autoPlayoffButton: document.querySelector("#autoPlayoffButton"),
   autoRelegationPlayoffButton: document.querySelector("#autoRelegationPlayoffButton"),
+  twoLegPlayoffInput: document.querySelector("#twoLegPlayoffInput"),
   customDialog: document.querySelector("#customDialog"),
   customQualificationInput: document.querySelector("#customQualificationInput"),
   customQualificationColorInput: document.querySelector("#customQualificationColorInput"),
@@ -86,14 +179,51 @@ const els = {
   projectionsList: document.querySelector("#projectionsList"),
   deductionsList: document.querySelector("#deductionsList"),
   deductionNotes: document.querySelector("#deductionNotes"),
+  sharedSeasonName: document.querySelector("#sharedSeasonName"),
+  sharedLeagueName: document.querySelector("#sharedLeagueName"),
+  sharedLeagueTab: document.querySelector("#sharedLeagueTab"),
+  sharedFixturesTab: document.querySelector("#sharedFixturesTab"),
+  sharedTeamTab: document.querySelector("#sharedTeamTab"),
+  sharedLeagueView: document.querySelector("#sharedLeagueView"),
+  sharedFixturesView: document.querySelector("#sharedFixturesView"),
+  sharedTeamView: document.querySelector("#sharedTeamView"),
+  sharedLegend: document.querySelector("#sharedLegend"),
+  sharedTableBody: document.querySelector("#sharedTableBody"),
+  sharedDeductionNotes: document.querySelector("#sharedDeductionNotes"),
+  sharedFixturesList: document.querySelector("#sharedFixturesList"),
+  sharedTeamProfile: document.querySelector("#sharedTeamProfile"),
+  bulkTeamsDialog: document.querySelector("#bulkTeamsDialog"),
+  bulkTeamsInput: document.querySelector("#bulkTeamsInput"),
+  shareDialog: document.querySelector("#shareDialog"),
+  shareLinkOutput: document.querySelector("#shareLinkOutput"),
+  shareQrImage: document.querySelector("#shareQrImage"),
+  copyShareLinkButton: document.querySelector("#copyShareLinkButton"),
+  toastStack: document.querySelector("#toastStack"),
+  groupDashboard: document.querySelector("#groupDashboard"),
+  pyramidLadder: document.querySelector("#pyramidLadder"),
+  historySeasonInput: document.querySelector("#historySeasonInput"),
+  historyTeamInput: document.querySelector("#historyTeamInput"),
+  historyPanel: document.querySelector("#historyPanel"),
+  graphicFormatInput: document.querySelector("#graphicFormatInput"),
+  graphicTeamInput: document.querySelector("#graphicTeamInput"),
+  graphicGameweekInput: document.querySelector("#graphicGameweekInput"),
+  graphicRaceInput: document.querySelector("#graphicRaceInput"),
+  renderLeagueGraphic2Button: document.querySelector("#renderLeagueGraphic2Button"),
+  renderPlayoffsGraphicButton: document.querySelector("#renderPlayoffsGraphicButton"),
+  renderTeamGraphicButton: document.querySelector("#renderTeamGraphicButton"),
+  renderRaceGraphicButton: document.querySelector("#renderRaceGraphicButton"),
+  renderGameweekGraphic2Button: document.querySelector("#renderGameweekGraphic2Button"),
   views: {
     editor: document.querySelector("#editorView"),
+    dashboard: document.querySelector("#dashboardView"),
     clean: document.querySelector("#cleanView"),
     fixtures: document.querySelector("#fixturesView"),
     playoffs: document.querySelector("#playoffsView"),
     bracket: document.querySelector("#bracketView"),
     projections: document.querySelector("#projectionsView"),
     deductions: document.querySelector("#deductionsView"),
+    history: document.querySelector("#historyView"),
+    graphics: document.querySelector("#graphicsView"),
   },
 };
 
@@ -101,7 +231,177 @@ function showPage(page) {
   els.homePage.hidden = page !== "home";
   els.creatorPage.hidden = page !== "creator";
   els.changelogPage.hidden = page !== "changelog";
+  els.newsPage.hidden = page !== "news";
+  els.sharePage.hidden = page !== "share";
   if (page === "creator") render();
+  if (page === "news") loadNews(newsSlugFromHash());
+}
+
+function notify(message, tone = "info") {
+  const item = document.createElement("div");
+  item.className = `toast ${tone}`;
+  item.textContent = message;
+  els.toastStack.append(item);
+  window.setTimeout(() => item.remove(), 3200);
+}
+
+function toggleDarkMode() {
+  state.darkMode = !state.darkMode;
+  document.body.classList.toggle("dark-mode", state.darkMode);
+  els.darkModeButton.textContent = state.darkMode ? "Light Mode" : "Dark Mode";
+  notify(`${state.darkMode ? "Dark" : "Light"} mode enabled.`, "success");
+}
+
+async function loadNews(targetSlug = "") {
+  els.newsArticle.hidden = true;
+  els.newsList.hidden = false;
+  els.newsList.innerHTML = `<p class="empty-note">Loading announcements...</p>`;
+  let posts = fallbackNewsPosts;
+  let warning = "";
+  try {
+    posts = await loadAnnouncementPosts();
+  } catch (error) {
+    if (isFilePreview()) warning = "Local file preview cannot reload announcement JSON files. Start the local preview server, then open http://localhost:5173/ to see JSON edits immediately.";
+    console.warn(error);
+    posts = fallbackNewsPosts;
+  }
+  posts = posts
+    .filter((post) => post && post.title)
+    .sort((a, b) => String(b.postDate || "").localeCompare(String(a.postDate || "")));
+  if (targetSlug) {
+    const post = posts.find((item) => item.slug === targetSlug);
+    if (post) {
+      renderNewsArticle(post);
+      return;
+    }
+  }
+  renderNewsList(posts, warning);
+}
+
+async function loadAnnouncementPosts() {
+  const cacheToken = Date.now();
+  const files = await fetch(`announcements/index.json?v=${cacheToken}`, { cache: "no-store" })
+    .then((response) => {
+      if (!response.ok) throw new Error("Announcement index failed to load.");
+      return response.json();
+    });
+  const results = await Promise.allSettled(files.map((entry) => loadAnnouncementPost(entry, cacheToken)));
+  const posts = results
+    .filter((result) => result.status === "fulfilled" && result.value)
+    .map((result) => result.value);
+  if (!posts.length) throw new Error("No announcement posts loaded.");
+  return posts;
+}
+
+async function loadAnnouncementPost(entry, cacheToken) {
+  const file = normalizeAnnouncementFile(entry);
+  if (!file) return null;
+  const post = await fetch(`announcements/${file}?v=${cacheToken}`, { cache: "no-store" })
+    .then((response) => {
+      if (!response.ok) throw new Error(`Announcement failed to load: ${file}`);
+      return response.json();
+    });
+  return { slug: post.slug || file.replace(/\.json$/i, ""), ...post };
+}
+
+function normalizeAnnouncementFile(entry) {
+  const file = typeof entry === "string" ? entry : entry?.file || entry?.path || "";
+  if (!file || file === "template.json") return "";
+  return file.replace(/^announcements\//, "");
+}
+
+function isFilePreview() {
+  return window.location.protocol === "file:";
+}
+
+function renderNewsList(posts, warning = "") {
+  els.newsList.innerHTML = warning ? `<p class="empty-note">${escapeHtml(warning)}</p>` : "";
+  posts.forEach((post) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "news-card";
+    card.innerHTML = `
+      <img src="${escapeAttribute(post.coverPhoto)}" alt="" />
+      <span>${escapeHtml(formatDate(post.postDate))}</span>
+      <strong>${escapeHtml(post.title)}</strong>
+    `;
+    card.addEventListener("click", () => openNewsArticle(post));
+    els.newsList.append(card);
+  });
+}
+
+function openNewsArticle(post) {
+  const url = new URL(window.location.href);
+  url.hash = `news=${encodeURIComponent(post.slug || slugify(post.title))}`;
+  if (window.location.hash !== url.hash) window.history.pushState(null, "", url);
+  renderNewsArticle(post);
+}
+
+function renderNewsArticle(post) {
+  els.newsList.hidden = true;
+  els.newsList.innerHTML = "";
+  els.newsArticle.hidden = false;
+  const postUrl = newsArticleUrl(post);
+  els.newsArticle.innerHTML = `
+    <div class="news-article-actions">
+      <button class="ghost-button news-back-button" type="button">Back to News</button>
+      <button class="secondary-button news-share-button" type="button">Copy Share Link</button>
+    </div>
+    <img src="${escapeAttribute(post.coverPhoto)}" alt="" />
+    <p class="eyebrow">${escapeHtml(formatDate(post.postDate))}</p>
+    <h3>${escapeHtml(post.title)}</h3>
+    <input class="news-share-link" value="${escapeAttribute(postUrl)}" readonly />
+    ${renderPostContent(post.content || [])}
+  `;
+  els.newsArticle.querySelector(".news-back-button").addEventListener("click", () => {
+    clearHash();
+    loadNews();
+  });
+  els.newsArticle.querySelector(".news-share-button").addEventListener("click", () => copyShareUrl(postUrl));
+}
+
+function newsArticleUrl(post) {
+  const url = new URL(window.location.href);
+  url.hash = `news=${encodeURIComponent(post.slug || slugify(post.title))}`;
+  return url.toString();
+}
+
+function newsSlugFromHash() {
+  const match = window.location.hash.match(/^#news=([^&]+)$/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function maybeRenderNewsPage() {
+  if (!newsSlugFromHash()) return false;
+  showPage("news");
+  return true;
+}
+
+function slugify(value) {
+  return String(value || "news")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "") || "news";
+}
+
+function clearHash() {
+  const url = new URL(window.location.href);
+  url.hash = "";
+  window.history.pushState(null, "", url);
+}
+
+function renderPostContent(content) {
+  return content.map((block) => {
+    if (block.type === "heading") return `<h4>${escapeHtml(block.text)}</h4>`;
+    if (block.type === "list") return `<ul>${(block.items || []).map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>`;
+    return `<p>${escapeHtml(block.text || "")}</p>`;
+  }).join("");
+}
+
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(`${value}T00:00:00`);
+  return date.toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
 }
 
 function createId(prefix) {
@@ -109,15 +409,20 @@ function createId(prefix) {
 }
 
 function createGroup(name = "Main Pyramid", seasonName = "Season 1") {
-  return { id: createId("group"), name, seasonName, seasons: [] };
+  return { id: createId("group"), name, seasonName, seasonStart: "", seasonEnd: "", seasons: [] };
 }
 
 function defaultTeam(index) {
   return {
     id: createId("team"),
     name: `Team ${index + 1}`,
+    color: teamColor(index),
     manual: { played: 0, won: 0, drawn: 0, lost: 0, for: 0, against: 0, diff: 0, points: 0 },
   };
+}
+
+function teamColor(index) {
+  return ["#177245", "#235a97", "#b96919", "#b83931", "#6d4ab3", "#65736f"][index % 6];
 }
 
 function defaultPositionRule(index) {
@@ -138,6 +443,8 @@ function createLeague(name = "New League", tier = 1, groupId = state.selectedGro
     promotesTo: "",
     relegatesTo: "",
     pointLabel: "Goal",
+    showTeamColors: false,
+    twoLegPlayoffs: false,
     fixtureMode: "single",
     teams: Array.from({ length: 12 }, (_, index) => defaultTeam(index)),
     positionRules: Array.from({ length: 12 }, (_, index) => defaultPositionRule(index)),
@@ -193,6 +500,8 @@ function normalizeGroup(group) {
     ...createGroup(group.name || "Main Pyramid", group.seasonName || group.currentSeason || "Season 1"),
     ...group,
     seasonName: group.seasonName || group.currentSeason || "Season 1",
+    seasonStart: group.seasonStart || "",
+    seasonEnd: group.seasonEnd || "",
     seasons: Array.isArray(group.seasons) ? group.seasons : [],
   };
 }
@@ -201,6 +510,7 @@ function normalizeLeague(league) {
   const normalizedTeams = (league.teams || []).map((team, index) => ({
     ...defaultTeam(index),
     ...team,
+    color: team.color || teamColor(index),
     manual: { ...defaultTeam(index).manual, ...(team.manual || team) },
   }));
   const migratedRules = league.positionRules || normalizedTeams.map((team, index) => ({
@@ -218,6 +528,8 @@ function normalizeLeague(league) {
     playoffs: { ...createBracket("promotion"), ...(league.playoffs || {}) },
     relegationPlayoff: { ...createBracket("relegation"), ...(league.relegationPlayoff || {}) },
     pointDeductions: league.pointDeductions || {},
+    showTeamColors: Boolean(league.showTeamColors),
+    twoLegPlayoffs: Boolean(league.twoLegPlayoffs),
   };
 }
 
@@ -382,6 +694,7 @@ function render() {
 
 function renderActiveView(league) {
   if (state.activeView === "editor") renderEditorTable(league);
+  if (state.activeView === "dashboard") renderDashboard();
   if (state.activeView === "clean") renderCleanTable(league);
   if (state.activeView === "fixtures") renderFixtures(league);
   if (state.activeView === "playoffs") {
@@ -391,6 +704,18 @@ function renderActiveView(league) {
   if (state.activeView === "bracket") renderPlayoffBracketView(league);
   if (state.activeView === "projections") renderProjections(league);
   if (state.activeView === "deductions") renderDeductions(league);
+  if (state.activeView === "history") renderHistory(league);
+  if (state.activeView === "graphics") renderGraphicsControls(league);
+}
+
+function renderGraphicsControls(league) {
+  const table = tableWithRules(league);
+  els.graphicTeamInput.innerHTML = table.map((row) => `<option value="${row.teamId}">${escapeHtml(row.team.name)}</option>`).join("");
+  const weeks = [...new Set(league.fixtures.map((fixture) => fixture.gameweek))].sort((a, b) => a - b);
+  els.graphicGameweekInput.innerHTML = [`<option value="all">All gameweeks</option>`]
+    .concat(weeks.map((week) => `<option value="${week}">Gameweek ${week}</option>`))
+    .join("");
+  els.graphicRaceInput.value = els.graphicRaceInput.value || state.activeRaceView || "title";
 }
 
 function ensureSelection() {
@@ -409,6 +734,8 @@ function renderGroups() {
   els.leagueGroupInput.innerHTML = options;
   els.groupSelect.value = state.selectedGroupId;
   els.seasonNameInput.value = selectedGroup()?.seasonName || "Season 1";
+  els.seasonStartInput.value = selectedGroup()?.seasonStart || "";
+  els.seasonEndInput.value = selectedGroup()?.seasonEnd || "";
   if (selectedLeague()) els.leagueGroupInput.value = selectedLeague().groupId;
 }
 
@@ -428,6 +755,7 @@ function renderLeagueList() {
     button.querySelector("span").textContent = `Tier ${league.tier} | ${league.teams.length} teams | ${league.status}`;
     button.addEventListener("click", () => {
       state.selectedLeagueId = league.id;
+      state.cleanRewindWeek = "";
       saveState();
       render();
     });
@@ -453,6 +781,41 @@ function renderTierList() {
   });
 }
 
+function renderDashboard() {
+  const group = selectedGroup();
+  const leagues = sortedLeagues();
+  const completed = leagues.filter((league) => league.status === "completed").length;
+  const teams = leagues.reduce((total, league) => total + league.teams.length, 0);
+  const fixtures = leagues.reduce((total, league) => total + league.fixtures.length, 0);
+  els.groupDashboard.innerHTML = [
+    dashboardStat("Group", group?.name || "Group"),
+    dashboardStat("Season", `${group?.seasonName || "Season"}${group?.seasonStart || group?.seasonEnd ? ` (${group.seasonStart || "?"} to ${group.seasonEnd || "?"})` : ""}`),
+    dashboardStat("Leagues", leagues.length),
+    dashboardStat("Teams", teams),
+    dashboardStat("Fixtures", fixtures),
+    dashboardStat("Completed", `${completed}/${leagues.length}`),
+  ].join("");
+  const tiers = new Map();
+  leagues.forEach((league) => tiers.set(league.tier, [...(tiers.get(league.tier) || []), league]));
+  els.pyramidLadder.innerHTML = [...tiers.entries()].map(([tier, tierLeagues]) => `
+    <div class="pyramid-tier">
+      <strong>Tier ${tier}</strong>
+      <div>${tierLeagues.map((league) => `<button class="league-pill" data-league-id="${league.id}" type="button">${escapeHtml(league.name)}</button>`).join("")}</div>
+    </div>
+  `).join("") || `<p class="empty-note">Add leagues to build a pyramid ladder.</p>`;
+  els.pyramidLadder.querySelectorAll("button").forEach((button) => button.addEventListener("click", () => {
+    state.selectedLeagueId = button.dataset.leagueId;
+    state.activeView = "clean";
+    state.cleanRewindWeek = "";
+    saveState();
+    render();
+  }));
+}
+
+function dashboardStat(label, value) {
+  return `<div class="dashboard-card"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
 function renderTabs() {
   document.querySelectorAll(".tab-button").forEach((button) => {
     button.classList.toggle("active", button.dataset.view === state.activeView);
@@ -469,6 +832,8 @@ function renderSettings(league) {
   els.statusInput.title = leagueCompletionIssues(league).join(" ");
   els.pointLabelInput.value = league.pointLabel || "Goal";
   els.fixtureModeInput.value = league.fixtureMode || "single";
+  els.teamColorsInput.value = league.showTeamColors ? "on" : "off";
+  els.twoLegPlayoffInput.checked = Boolean(league.twoLegPlayoffs);
   renderLeagueSelects(league);
 }
 
@@ -497,7 +862,12 @@ function renderEditorTable(league) {
     tr.style.setProperty("--custom-zone", rule.customColor || "#6d4ab3");
     tr.innerHTML = `
       <td><span class="rank-pill">${index + 1}</span></td>
-      <td><input data-field="name" value="${escapeAttribute(team.name)}" aria-label="Team name" /></td>
+      <td>
+        <div class="team-edit-cell">
+          ${league.showTeamColors ? `<input class="team-color-input" data-field="color" type="color" value="${escapeAttribute(team.color || teamColor(index))}" aria-label="Team colour" />` : ""}
+          <input data-field="name" value="${escapeAttribute(team.name)}" aria-label="Team name" />
+        </div>
+      </td>
       <td>${row.played}</td>
       <td>${row.won}</td>
       <td>${row.drawn}</td>
@@ -533,27 +903,65 @@ function renderCleanTable(league) {
     renderSnapshotCleanTable(snapshotLeague);
     return;
   }
-  const table = tableWithRules(league);
-  els.cleanLeagueName.textContent = `${league.name} | ${selectedGroup()?.seasonName || "Current Season"}`;
-  renderCleanLegend(league);
-  renderDeductionNotes(league, table);
+  if (state.cleanRewindWeek && !league.fixtures.some((fixture) => fixture.gameweek === Number(state.cleanRewindWeek))) {
+    state.cleanRewindWeek = "";
+  }
+  const displayLeague = state.cleanRewindWeek ? leagueBeforeGameweek(league, Number(state.cleanRewindWeek)) : league;
+  const table = tableWithRules(displayLeague);
+  const rewindLabel = state.cleanRewindWeek ? ` | Before Gameweek ${state.cleanRewindWeek}` : "";
+  els.cleanLeagueName.textContent = `${league.name} | ${selectedGroup()?.seasonName || "Current Season"}${rewindLabel}`;
+  renderShareTeamOptions(league);
+  renderCleanLegend(displayLeague);
+  renderDeductionNotes(displayLeague, table);
+  renderRewindControls(league);
   els.cleanTableBody.innerHTML = "";
   table.forEach((row, index) => {
-    const status = mathematicalStatus(league, table, row, index);
+    const status = state.cleanRewindWeek ? "" : mathematicalStatus(league, table, row, index);
     const tr = document.createElement("tr");
     tr.className = qualificationClass(row.positionRule);
     tr.style.setProperty("--custom-zone", row.positionRule.customColor || "#6d4ab3");
     tr.innerHTML = `
       <td><span class="rank-pill">${index + 1}</span></td>
-      <td><button class="team-link" data-team-id="${escapeAttribute(row.teamId)}" type="button">${escapeHtml(row.team.name)}${playoffMovementBadge(league, row.teamId)}</button></td>
+      <td><button class="team-link" data-team-id="${escapeAttribute(row.teamId)}" type="button">${teamColorDot(displayLeague, row.team)}${escapeHtml(row.team.name)}${state.cleanRewindWeek ? "" : playoffMovementBadge(league, row.teamId)}</button></td>
       <td>${row.played}</td><td>${row.won}</td><td>${row.drawn}</td><td>${row.lost}</td>
       <td>${row.for}</td><td>${row.against}</td><td>${row.diff}</td><td><strong>${row.points}</strong></td>
       <td>${renderForm(row.form)}</td>
       <td>${status ? `<span class="status-chip">${escapeHtml(status)}</span>` : ""}</td>
     `;
-    tr.querySelector(".team-link").addEventListener("click", () => openTeamDialog(league, row.teamId));
+    tr.querySelector(".team-link").addEventListener("click", () => openTeamDialog(displayLeague, row.teamId));
     els.cleanTableBody.append(tr);
   });
+}
+
+function leagueBeforeGameweek(league, week) {
+  const copy = structuredClone(league);
+  copy.fixtures = copy.fixtures.filter((fixture) => fixture.played && fixture.gameweek < week);
+  return copy;
+}
+
+function renderRewindControls(league) {
+  const weeks = [...new Set(league.fixtures.map((fixture) => fixture.gameweek))].sort((a, b) => a - b);
+  if (state.cleanRewindWeek && !weeks.includes(Number(state.cleanRewindWeek))) state.cleanRewindWeek = "";
+  els.rewindGameweekInput.innerHTML = [`<option value="">Current table</option>`]
+    .concat(weeks.map((week) => `<option value="${week}">Before Gameweek ${week}</option>`))
+    .join("");
+  els.rewindGameweekInput.value = state.cleanRewindWeek || "";
+  els.rewindTableBox.innerHTML = state.cleanRewindWeek
+    ? `<p class="empty-note">The main clean table is showing the standings before Gameweek ${state.cleanRewindWeek}.</p>`
+    : `<p class="empty-note">Choose a gameweek to rewind the main clean table.</p>`;
+}
+
+function renderRewindTable() {
+  state.cleanRewindWeek = els.rewindGameweekInput.value;
+  const league = selectedLeague();
+  if (league) renderCleanTable(league);
+}
+
+function renderShareTeamOptions(league) {
+  els.shareTeamInput.innerHTML = tableWithRules(league)
+    .map((row) => `<option value="${row.teamId}">${escapeHtml(row.team.name)}</option>`)
+    .join("");
+  els.shareTeamInput.hidden = els.shareModeInput.value !== "team";
 }
 
 function renderCleanSeasonOptions() {
@@ -575,6 +983,8 @@ function renderSnapshotCleanTable(snapshotLeague) {
   els.cleanLeagueName.textContent = `${snapshotLeague.name} | ${snapshotLeague.seasonName}`;
   renderSnapshotLegend(snapshotLeague);
   els.deductionNotes.innerHTML = snapshotLeague.deductionNotes || "";
+  els.rewindGameweekInput.innerHTML = `<option value="">Season archive</option>`;
+  els.rewindTableBox.innerHTML = `<p class="empty-note">Gameweek rewind is available for the current season table.</p>`;
   els.cleanTableBody.innerHTML = "";
   snapshotLeague.table.forEach((row, index) => {
     const tr = document.createElement("tr");
@@ -590,6 +1000,282 @@ function renderSnapshotCleanTable(snapshotLeague) {
     `;
     tr.querySelector(".team-link").addEventListener("click", () => openTeamDialog(snapshotLeague, row.teamId, true));
     els.cleanTableBody.append(tr);
+  });
+}
+
+function generateShareCode() {
+  const league = selectedLeague();
+  if (!league) return;
+  const payload = createSharePayload(league, els.shareModeInput.value, els.shareTeamInput.value);
+  const shareCode = encodeSharePayload(payload);
+  const url = new URL(window.location.href);
+  url.hash = `share=${shareCode}`;
+  showShareDialog(url.href);
+}
+
+function createSharePayload(league, mode = "league", teamId = "") {
+  const snapshotLeague = selectedSnapshotLeague(league);
+  if (snapshotLeague) {
+    return {
+      version: 1,
+      mode,
+      name: snapshotLeague.name,
+      seasonName: snapshotLeague.seasonName,
+      table: mode === "fixtures" ? [] : snapshotLeague.table,
+      fixtures: mode === "league" || mode === "team" ? [] : shareFixtures(snapshotLeague),
+      team: mode === "team" ? shareTeamProfile(snapshotLeague, teamId) : null,
+      deductionNotes: plainDeductionNotesFromSnapshot(snapshotLeague),
+    };
+  }
+  const table = tableWithRules(league);
+  return {
+    version: 1,
+    mode,
+    name: league.name,
+    seasonName: selectedGroup()?.seasonName || "Current Season",
+    table: mode === "fixtures" ? [] : table.map((row, index) => ({
+      teamId: row.teamId,
+      teamName: row.team.name,
+      played: row.played,
+      won: row.won,
+      drawn: row.drawn,
+      lost: row.lost,
+      for: row.for,
+      against: row.against,
+      diff: row.diff,
+      points: row.points,
+      form: row.form,
+      status: mathematicalStatus(league, table, row, index),
+      positionRule: row.positionRule,
+      playoffBadge: playoffMovementBadge(league, row.teamId),
+    })),
+    fixtures: mode === "league" || mode === "team" ? [] : shareFixtures(league),
+    team: mode === "team" ? shareTeamProfile(league, teamId) : null,
+    deductionNotes: deductionNotesFor(league, table),
+  };
+}
+
+function shareTeamProfile(leagueLike, teamId) {
+  const table = leagueLike.table || tableWithRules(leagueLike);
+  const row = table.find((item) => item.teamId === teamId) || table[0];
+  if (!row) return null;
+  const fixtures = (leagueLike.fixtures || [])
+    .filter((fixture) => fixture.homeId === row.teamId || fixture.awayId === row.teamId)
+    .map((fixture) => ({
+      gameweek: fixture.gameweek || 1,
+      homeName: plainTeamName(leagueLike, fixture.homeId),
+      awayName: plainTeamName(leagueLike, fixture.awayId),
+      homeScore: fixture.homeScore,
+      awayScore: fixture.awayScore,
+      played: Boolean(fixture.played && Number.isFinite(fixture.homeScore) && Number.isFinite(fixture.awayScore)),
+    }));
+  return {
+    teamName: row.team?.name || row.teamName,
+    played: row.played,
+    won: row.won,
+    drawn: row.drawn,
+    lost: row.lost,
+    for: row.for,
+    against: row.against,
+    diff: row.diff,
+    points: row.points,
+    form: row.form || [],
+    status: row.status || "",
+    fixtures,
+  };
+}
+
+function shareFixtures(leagueLike) {
+  return (leagueLike.fixtures || []).map((fixture) => ({
+    id: fixture.id,
+    gameweek: fixture.gameweek || 1,
+    date: fixture.date || "",
+    homeName: plainTeamName(leagueLike, fixture.homeId),
+    awayName: plainTeamName(leagueLike, fixture.awayId),
+    homeScore: fixture.homeScore,
+    awayScore: fixture.awayScore,
+    played: Boolean(fixture.played && Number.isFinite(fixture.homeScore) && Number.isFinite(fixture.awayScore)),
+  }));
+}
+
+function encodeSharePayload(payload) {
+  const json = JSON.stringify(payload);
+  return btoa(unescape(encodeURIComponent(json))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+}
+
+function decodeSharePayload(code) {
+  const base64 = code.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(code.length / 4) * 4, "=");
+  return JSON.parse(decodeURIComponent(escape(atob(base64))));
+}
+
+function showShareDialog(url) {
+  state.latestShareUrl = url;
+  els.shareLinkOutput.value = url;
+  els.shareQrImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
+  els.shareDialog.showModal();
+  copyShareUrl(url);
+}
+
+async function copyShareUrl(url = state.latestShareUrl) {
+  try {
+    await navigator.clipboard.writeText(url);
+    notify("Share link copied.", "success");
+  } catch {
+    notify("Copy failed. The link is shown in the share dialog.", "warn");
+  }
+}
+
+function maybeRenderSharedPage() {
+  const match = window.location.hash.match(/^#share=(.+)$/);
+  if (!match) return false;
+  try {
+    renderSharedCleanPage(decodeSharePayload(match[1]));
+    return true;
+  } catch {
+    alert("This share link could not be opened.");
+    window.location.hash = "";
+    return false;
+  }
+}
+
+function renderSharedCleanPage(payload) {
+  els.sharedSeasonName.textContent = payload.seasonName || "Shared League";
+  els.sharedLeagueName.textContent = payload.name || "League Table";
+  renderSharedLegend(payload.table || []);
+  els.sharedTableBody.innerHTML = "";
+  (payload.table || []).forEach((row, index) => {
+    const tr = document.createElement("tr");
+    tr.className = qualificationClass(row.positionRule || defaultPositionRule(0));
+    tr.style.setProperty("--custom-zone", row.positionRule?.customColor || "#6d4ab3");
+    tr.innerHTML = `
+      <td><span class="rank-pill">${index + 1}</span></td>
+      <td><strong>${escapeHtml(row.teamName)}${row.playoffBadge || ""}</strong></td>
+      <td>${row.played}</td><td>${row.won}</td><td>${row.drawn}</td><td>${row.lost}</td>
+      <td>${row.for}</td><td>${row.against}</td><td>${row.diff}</td><td><strong>${row.points}</strong></td>
+      <td>${renderForm(row.form || [])}</td>
+      <td>${row.status ? `<span class="status-chip">${escapeHtml(row.status)}</span>` : ""}</td>
+    `;
+    els.sharedTableBody.append(tr);
+  });
+  els.sharedDeductionNotes.innerHTML = (payload.deductionNotes || []).map((note) => `<p>* ${escapeHtml(note)}</p>`).join("");
+  renderSharedFixtures(payload.fixtures || []);
+  renderSharedTeamProfile(payload.team);
+  setSharedTab("league");
+  if (payload.mode === "fixtures") setSharedTab("fixtures");
+  if (payload.mode === "team") setSharedTab("team");
+  showPage("share");
+}
+
+function setSharedTab(tab) {
+  els.sharedLeagueView.hidden = tab !== "league";
+  els.sharedFixturesView.hidden = tab !== "fixtures";
+  els.sharedTeamView.hidden = tab !== "team";
+  els.sharedLeagueTab.classList.toggle("active", tab === "league");
+  els.sharedFixturesTab.classList.toggle("active", tab === "fixtures");
+  els.sharedTeamTab.classList.toggle("active", tab === "team");
+}
+
+function renderSharedTeamProfile(team) {
+  if (!team) {
+    els.sharedTeamProfile.innerHTML = `<p class="empty-note">No team profile was included in this share.</p>`;
+    return;
+  }
+  els.sharedTeamProfile.innerHTML = `
+    <div class="team-profile-header">
+      <div>
+        <p class="eyebrow">Team profile</p>
+        <h3>${escapeHtml(team.teamName)}</h3>
+      </div>
+      ${team.status ? `<span class="status-chip">${escapeHtml(team.status)}</span>` : ""}
+    </div>
+    <div class="team-stat-grid">
+      ${teamStat("P", team.played)}
+      ${teamStat("W", team.won)}
+      ${teamStat("D", team.drawn)}
+      ${teamStat("L", team.lost)}
+      ${teamStat("For", team.for)}
+      ${teamStat("Ag", team.against)}
+      ${teamStat("Diff", team.diff)}
+      ${teamStat("Pts", team.points)}
+    </div>
+    <div class="team-profile-fixtures">
+      ${(team.fixtures || []).map((fixture) => `
+        <div class="shared-fixture-row">
+          <span>GW ${fixture.gameweek || 1}</span>
+          <strong>${escapeHtml(fixture.homeName)}</strong>
+          <strong class="score-box ${sharedResultClass(fixture, "home")}">${fixture.played ? fixture.homeScore : "-"}</strong>
+          <strong class="score-box ${sharedResultClass(fixture, "away")}">${fixture.played ? fixture.awayScore : "-"}</strong>
+          <strong>${escapeHtml(fixture.awayName)}</strong>
+          <span class="fixture-state">${fixture.played ? "Played" : "Upcoming"}</span>
+        </div>
+      `).join("") || `<p class="empty-note">No fixtures shared for this team.</p>`}
+    </div>
+  `;
+}
+
+function teamStat(label, value) {
+  return `<div class="team-stat"><span>${escapeHtml(label)}</span><strong>${escapeHtml(value)}</strong></div>`;
+}
+
+function renderSharedFixtures(fixtures) {
+  els.sharedFixturesList.innerHTML = "";
+  if (!fixtures.length) {
+    els.sharedFixturesList.innerHTML = `<p class="empty-note">No fixtures were shared for this league.</p>`;
+    return;
+  }
+  const byGameweek = new Map();
+  fixtures
+    .slice()
+    .sort((a, b) => (a.gameweek || 1) - (b.gameweek || 1))
+    .forEach((fixture) => byGameweek.set(fixture.gameweek || 1, [...(byGameweek.get(fixture.gameweek || 1) || []), fixture]));
+  byGameweek.forEach((items, gameweek) => {
+    const section = document.createElement("section");
+    section.className = "gameweek";
+    section.innerHTML = `<h4>Gameweek ${gameweek}</h4>`;
+    items.forEach((fixture) => {
+      const row = document.createElement("div");
+      row.className = "shared-fixture-row";
+      const played = fixture.played && Number.isFinite(fixture.homeScore) && Number.isFinite(fixture.awayScore);
+      row.innerHTML = `
+        <span>${escapeHtml(fixture.homeName)}</span>
+        <strong class="score-box ${sharedResultClass(fixture, "home")}">${played ? fixture.homeScore : "-"}</strong>
+        <span class="fixture-separator">v</span>
+        <strong class="score-box ${sharedResultClass(fixture, "away")}">${played ? fixture.awayScore : "-"}</strong>
+        <span>${escapeHtml(fixture.awayName)}</span>
+        <span class="fixture-state">${played ? "Played" : "Upcoming"}</span>
+        <span class="fixture-state">${fixture.date ? escapeHtml(fixture.date) : "No date"}</span>
+      `;
+      section.append(row);
+    });
+    els.sharedFixturesList.append(section);
+  });
+}
+
+function sharedResultClass(fixture, side) {
+  if (!fixture.played || !Number.isFinite(fixture.homeScore) || !Number.isFinite(fixture.awayScore)) return "future";
+  if (fixture.homeScore === fixture.awayScore) return "draw";
+  const homeWon = fixture.homeScore > fixture.awayScore;
+  return (side === "home" && homeWon) || (side === "away" && !homeWon) ? "win" : "loss";
+}
+
+function renderSharedLegend(table) {
+  const seen = new Map();
+  table.forEach((row) => {
+    const rule = row.positionRule || defaultPositionRule(0);
+    const label = rule.qualification === "custom" ? rule.customQualification || "Custom Qualification" : qualificationTypes[rule.qualification];
+    const color = qualificationColor(rule);
+    const key = `${rule.qualification}:${label}:${color}`;
+    if (rule.qualification === "none" || seen.has(key)) return;
+    seen.set(key, { label, color });
+  });
+  els.sharedLegend.innerHTML = "";
+  seen.forEach((item) => {
+    const chip = document.createElement("div");
+    chip.className = "legend-chip";
+    chip.innerHTML = `<span></span><strong></strong>`;
+    chip.querySelector("span").style.background = item.color;
+    chip.querySelector("strong").textContent = item.label;
+    els.sharedLegend.append(chip);
   });
 }
 
@@ -618,6 +1304,10 @@ function playoffMovementBadge(league, teamId) {
   if (league.playoffs.championId === teamId) return `<span class="movement-badge badge-promoted">P</span>`;
   if (league.relegationPlayoff.championId === teamId) return `<span class="movement-badge badge-relegated">R</span>`;
   return "";
+}
+
+function teamColorDot(league, team) {
+  return league.showTeamColors ? `<span class="team-color-dot" style="background:${escapeAttribute(team.color || "#65736f")}"></span>` : "";
 }
 
 function renderDeductionNotes(league, table = tableWithRules(league)) {
@@ -718,13 +1408,17 @@ function renderForm(form) {
 
 function renderFixtures(league) {
   renderManualFixtureControls(league);
+  renderFixtureFilters(league);
   els.fixturesList.innerHTML = "";
   if (!league.fixtures.length) {
     els.fixturesList.innerHTML = `<p class="empty-note">Generate fixtures or add manual fixtures to start entering ${escapeHtml((league.pointLabel || "goal").toLowerCase())} totals and automatic tables.</p>`;
     return;
   }
   const byGameweek = new Map();
-  league.fixtures.forEach((fixture) => byGameweek.set(fixture.gameweek, [...(byGameweek.get(fixture.gameweek) || []), fixture]));
+  league.fixtures
+    .filter((fixture) => state.fixtureFilter === "all" || String(fixture.gameweek) === state.fixtureFilter)
+    .forEach((fixture) => byGameweek.set(fixture.gameweek, [...(byGameweek.get(fixture.gameweek) || []), fixture]));
+  els.fixturesList.classList.toggle("calendar-mode", state.fixtureCalendarMode);
   byGameweek.forEach((fixtures, gameweek) => {
     const section = document.createElement("section");
     section.className = "gameweek";
@@ -732,6 +1426,15 @@ function renderFixtures(league) {
     fixtures.forEach((fixture) => section.append(renderFixtureRow(league, fixture)));
     els.fixturesList.append(section);
   });
+}
+
+function renderFixtureFilters(league) {
+  const weeks = [...new Set(league.fixtures.map((fixture) => fixture.gameweek))].sort((a, b) => a - b);
+  els.fixtureGameweekFilter.innerHTML = [`<option value="all">All gameweeks</option>`]
+    .concat(weeks.map((week) => `<option value="${week}">Gameweek ${week}</option>`))
+    .join("");
+  els.fixtureGameweekFilter.value = weeks.some((week) => String(week) === state.fixtureFilter) ? state.fixtureFilter : "all";
+  els.fixtureCalendarButton.textContent = state.fixtureCalendarMode ? "List View" : "Calendar View";
 }
 
 function renderManualFixtureControls(league) {
@@ -754,6 +1457,7 @@ function renderFixtureRow(league, fixture) {
     <span class="fixture-separator">v</span>
     <input data-score="away" type="number" min="0" value="${fixture.awayScore ?? ""}" aria-label="Away ${escapeAttribute(league.pointLabel)}s" />
     <span>${teamName(league, fixture.awayId)}</span>
+    <input data-date="fixture" type="date" value="${escapeAttribute(fixture.date || "")}" aria-label="Fixture date" />
     <div class="fixture-actions">
       <button class="secondary-button" data-action="clear" type="button">Clear</button>
       <button class="danger-button" data-action="delete" type="button">Delete</button>
@@ -965,6 +1669,65 @@ function renderDeductions(league) {
   });
 }
 
+function renderHistory(league) {
+  const group = selectedGroup();
+  const seasons = group?.seasons || [];
+  const previousSeasonId = els.historySeasonInput.value || "current";
+  const previousTeamId = els.historyTeamInput.value || "";
+  els.historySeasonInput.innerHTML = [`<option value="current">Current: ${escapeHtml(group?.seasonName || "Season")}</option>`]
+    .concat(seasons.map((season) => `<option value="${season.id}">${escapeHtml(season.name)}</option>`))
+    .join("");
+  els.historySeasonInput.value = seasons.some((season) => season.id === previousSeasonId) ? previousSeasonId : "current";
+  const selectedSeasonId = els.historySeasonInput.value || "current";
+  const sourceLeagues = selectedSeasonId === "current"
+    ? sortedLeagues()
+    : seasons.find((season) => season.id === selectedSeasonId)?.leagues || [];
+  const teamOptions = [];
+  sourceLeagues.forEach((item) => {
+    const rows = item.table || tableWithRules(item);
+    rows.forEach((row) => teamOptions.push({ id: row.teamId, name: row.team?.name || row.teamName, league: item.name }));
+  });
+  els.historyTeamInput.innerHTML = [`<option value="">All teams</option>`]
+    .concat(teamOptions.map((team) => `<option value="${team.id}">${escapeHtml(team.name)} | ${escapeHtml(team.league)}</option>`))
+    .join("");
+  els.historyTeamInput.value = teamOptions.some((team) => team.id === previousTeamId) ? previousTeamId : "";
+  const teamId = els.historyTeamInput.value;
+  if (teamId) {
+    renderHistoryTeam(sourceLeagues, teamId);
+  } else {
+    els.historyPanel.innerHTML = sourceLeagues.map((item) => {
+      const rows = item.table || tableWithRules(item);
+      const champion = rows[0]?.team?.name || rows[0]?.teamName || "TBD";
+      const auto = rows.filter((row) => row.positionRule?.qualification === "automatic").map((row) => row.team?.name || row.teamName);
+      const relegated = rows.filter((row) => row.positionRule?.qualification === "relegation").map((row) => row.team?.name || row.teamName);
+      const playoffPromoted = rows.find((row) => String(row.playoffBadge || "").includes("badge-promoted"))?.teamName || "";
+      return `<div class="history-card">
+        <strong>${escapeHtml(item.name)}</strong>
+        <span>Champion: ${escapeHtml(champion)}</span>
+        <span>Automatic promotion: ${escapeHtml(auto.join(", ") || "None")}</span>
+        <span>Playoff promotion: ${escapeHtml(playoffPromoted || "None")}</span>
+        <span>Relegated: ${escapeHtml(relegated.join(", ") || "None")}</span>
+      </div>`;
+    }).join("") || `<p class="empty-note">No archived seasons yet. Complete a group season to build history.</p>`;
+  }
+}
+
+function renderHistoryTeam(leagues, teamId) {
+  const entries = [];
+  leagues.forEach((league) => {
+    const rows = league.table || tableWithRules(league);
+    const row = rows.find((item) => item.teamId === teamId);
+    if (row) entries.push({ league, row, position: rows.indexOf(row) + 1 });
+  });
+  els.historyPanel.innerHTML = entries.map(({ league, row, position }) => `
+    <div class="history-card">
+      <strong>${escapeHtml(row.team?.name || row.teamName)} - ${escapeHtml(league.name)}</strong>
+      <span>Position ${position}</span>
+      <span>${row.played}P ${row.won}W ${row.drawn}D ${row.lost}L | ${row.points} pts</span>
+    </div>
+  `).join("") || `<p class="empty-note">No history found for this team.</p>`;
+}
+
 function updatePointDeduction(league, input) {
   const points = Math.max(0, Number(input.value) || 0);
   league.pointDeductions ||= {};
@@ -989,8 +1752,9 @@ function renderProjections(league) {
     { key: "title", label: "Guarantee 1st place" },
     { key: "automatic", label: "Guarantee automatic promotion" },
     { key: "playoff", label: "Guarantee playoffs minimum" },
-    { key: "safe", label: "Guarantee safety" },
+    { key: "survival", label: "Guarantee survival" },
   ];
+  const activeTarget = targets.find((target) => target.key === state.activeRaceView) || targets[0];
   tableWithRules(league).forEach((row) => {
     const fixture = nextFixtureForTeam(league, row.teamId);
     if (!fixture) return;
@@ -999,7 +1763,7 @@ function renderProjections(league) {
     const card = document.createElement("article");
     card.className = "projection-card";
     card.innerHTML = `<h4>${escapeHtml(row.team.name)}</h4><p class="empty-note">Next: ${escapeHtml(plainTeamName(league, fixture.homeId))} v ${escapeHtml(plainTeamName(league, fixture.awayId))}</p>`;
-    targets.forEach((target) => {
+    [activeTarget].forEach((target) => {
       const matches = scenarios.filter((scenario) => scenario.results[target.key] && !currentResults[target.key]);
       const line = document.createElement("div");
       line.className = "projection-line";
@@ -1050,7 +1814,7 @@ function projectionResults(league, table, row) {
     title: status === "Guaranteed 1st",
     automatic: status === "Guaranteed 1st" || status === "Guaranteed automatic promotion",
     playoff: status === "Guaranteed 1st" || status === "Guaranteed automatic promotion" || status === "Guaranteed playoffs minimum",
-    safe: guaranteedSafe(league, table, row, countQualification(league, "relegation")),
+    survival: guaranteedSafe(league, table, row, countQualification(league, "relegation")),
   };
 }
 
@@ -1272,6 +2036,444 @@ function renderLeagueGraphic() {
   link.click();
 }
 
+function renderGameweekGraphic() {
+  const league = selectedLeague();
+  if (!league) return;
+  const weeks = [...new Set(league.fixtures.map((fixture) => fixture.gameweek))].sort((a, b) => a - b);
+  const selected = els.graphicGameweekInput?.value || state.fixtureFilter;
+  const gameweek = selected === "all" ? weeks[0] : Number(selected);
+  const fixtures = league.fixtures.filter((fixture) => selected === "all" || fixture.gameweek === gameweek);
+  if (!fixtures.length) {
+    notify("No fixtures found for that gameweek.", "warn");
+    return;
+  }
+  const scale = 2;
+  const width = 900;
+  const rowHeight = 56;
+  const height = 150 + fixtures.length * rowHeight + 48;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "#f7faf8";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "#0c5c35";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText(`${league.name} | ${selected === "all" ? "ALL GAMEWEEKS" : `GAMEWEEK ${gameweek}`}`.toUpperCase(), 48, 62);
+  ctx.fillStyle = "#17211f";
+  ctx.font = "900 36px Inter, Arial, sans-serif";
+  ctx.fillText("Fixtures and Results", 48, 108);
+  drawRoundRect(ctx, 48, 136, width - 96, fixtures.length * rowHeight + 24, 8, "rgba(255,255,255,.92)", "#d7dfdc");
+  fixtures.forEach((fixture, index) => {
+    const y = 176 + index * rowHeight;
+    ctx.fillStyle = index % 2 ? "#ffffff" : "#f1f6f4";
+    ctx.fillRect(66, y - 28, width - 132, rowHeight - 8);
+    ctx.fillStyle = "#17211f";
+    ctx.font = "900 18px Inter, Arial, sans-serif";
+    ctx.fillStyle = "#65736f";
+    ctx.font = "800 12px Inter, Arial, sans-serif";
+    ctx.fillText(fixture.date || "No date", 86, y);
+    ctx.fillStyle = "#17211f";
+    ctx.font = "900 18px Inter, Arial, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(plainTeamName(league, fixture.homeId), 342, y);
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#65736f";
+    ctx.font = "900 16px Inter, Arial, sans-serif";
+    ctx.fillText(fixture.played ? `${fixture.homeScore} - ${fixture.awayScore}` : "v", 450, y);
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#17211f";
+    ctx.font = "900 18px Inter, Arial, sans-serif";
+    ctx.fillText(plainTeamName(league, fixture.awayId), 558, y);
+  });
+  ctx.textAlign = "left";
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `${slugify(`${league.name}-${selected === "all" ? "all-gameweeks" : `gameweek-${gameweek}`}`)}.png`;
+  link.click();
+}
+
+function renderPlayoffsGraphic() {
+  const league = selectedLeague();
+  if (!league) return;
+  const lines = [...(league.playoffs.matches || []), ...(league.relegationPlayoff.matches || [])]
+    .map((match) => `${match.roundName}: ${plainTeamName(league, match.homeId)} ${match.homeScore ?? "-"} - ${match.awayScore ?? "-"} ${plainTeamName(league, match.awayId)}`);
+  renderTextGraphic(`${league.name} Playoffs`, "PLAYOFF BRACKET", lines.length ? lines : ["No playoff matches generated yet."], "playoffs");
+}
+
+function renderTeamGraphic() {
+  const league = selectedLeague();
+  if (!league) return;
+  const table = tableWithRules(league);
+  const teamId = els.graphicTeamInput.value || els.shareTeamInput.value || table[0]?.teamId;
+  const row = table.find((item) => item.teamId === teamId) || table[0];
+  if (!row) return;
+  const scale = 2;
+  const format = els.graphicFormatInput?.value || "default";
+  const size = format === "story" ? [720, 1280] : format === "square" ? [1080, 1080] : [1100, 760];
+  const [width, height] = size;
+  const margin = format === "story" ? 42 : 48;
+  const panelX = margin;
+  const panelY = format === "story" ? 160 : 150;
+  const panelW = width - margin * 2;
+  const panelH = height - panelY - margin;
+  const gap = format === "story" ? 18 : 24;
+  const boxW = (panelW - gap * 3) / 2;
+  const boxH = format === "story" ? 180 : 150;
+  const boxX1 = panelX + gap;
+  const boxX2 = boxX1 + boxW + gap;
+  const boxY1 = panelY + gap;
+  const boxY2 = boxY1 + boxH + gap;
+  const recentMatches = recentTeamMatches(league, row.teamId, 5);
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+
+  drawGraphicBackdrop(ctx, width, height);
+  ctx.fillStyle = "#0c5c35";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText(`${league.name} | TEAM PROFILE`.toUpperCase(), margin, 66);
+  ctx.fillStyle = "#17211f";
+  ctx.font = `900 ${format === "story" ? 38 : 42}px Inter, Arial, sans-serif`;
+  drawFittedText(ctx, row.team.name, margin, format === "story" ? 118 : 112, width - margin * 2, format === "story" ? 38 : 42);
+
+  drawRoundRect(ctx, panelX, panelY, panelW, panelH, 8, "rgba(255, 255, 255, 0.92)", "#d7dfdc");
+  drawTeamStatBox(ctx, boxX1, boxY1, boxW, boxH, ordinal(row.position + 1), "Position", "#17211f");
+  drawRecordBox(ctx, boxX2, boxY1, boxW, boxH, row);
+  drawTeamStatBox(ctx, boxX1, boxY2, boxW, boxH, String(row.points), "Points", "#177245");
+  drawFormBox(ctx, boxX2, boxY2, boxW, boxH, row.form.slice(-4));
+
+  const resultsY = boxY2 + boxH + (format === "story" ? 34 : 30);
+  ctx.fillStyle = "#65736f";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText("PREVIOUS 5 MATCHES", boxX1, resultsY);
+  drawRecentMatches(ctx, league, row.teamId, recentMatches, boxX1, resultsY + 24, panelW - gap * 2, height - resultsY - margin - 28);
+
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `${slugify(`team-profile-${row.team.name}`)}.png`;
+  link.click();
+}
+
+function renderRaceGraphic() {
+  const league = selectedLeague();
+  if (!league) return;
+  const raceKey = els.graphicRaceInput?.value || state.activeRaceView || "title";
+  const labels = { title: "Title Race", automatic: "Automatic Promotion Race", playoff: "Playoff Race", survival: "Relegation Battle" };
+  const goals = {
+    title: "Guaranteed 1st",
+    automatic: "Automatic promotion",
+    playoff: "Playoffs minimum",
+    survival: "Survival",
+  };
+  const table = tableWithRules(league);
+  const rows = raceGraphicRows(league, table, raceKey).slice(0, 8);
+  const scale = 2;
+  const format = els.graphicFormatInput?.value || "default";
+  const size = format === "story" ? [720, 1280] : format === "square" ? [1080, 1080] : [1100, 760];
+  const [width, height] = size;
+  const margin = format === "story" ? 42 : 48;
+  const panelX = margin;
+  const panelY = format === "story" ? 160 : 150;
+  const panelW = width - margin * 2;
+  const panelH = height - panelY - margin;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+
+  drawGraphicBackdrop(ctx, width, height);
+  ctx.fillStyle = "#0c5c35";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText(`${league.name} | RACE CENTRE`.toUpperCase(), margin, 66);
+  ctx.fillStyle = "#17211f";
+  ctx.font = `900 ${format === "story" ? 38 : 42}px Inter, Arial, sans-serif`;
+  drawFittedText(ctx, labels[raceKey] || "Race Centre", margin, format === "story" ? 118 : 112, width - margin * 2, format === "story" ? 38 : 42);
+  drawRoundRect(ctx, panelX, panelY, panelW, panelH, 8, "rgba(255, 255, 255, 0.92)", "#d7dfdc");
+
+  const gap = format === "story" ? 14 : 18;
+  const boxH = format === "story" ? 112 : 108;
+  const statW = (panelW - gap * 4) / 3;
+  const statY = panelY + gap;
+  drawRaceSummaryBox(ctx, panelX + gap, statY, statW, boxH, String(rows.length), "Teams Shown");
+  drawRaceSummaryBox(ctx, panelX + gap * 2 + statW, statY, statW, boxH, goals[raceKey] || "Race Goal");
+  drawRaceSummaryBox(ctx, panelX + gap * 3 + statW * 2, statY, statW, boxH, `${rows.reduce((total, row) => total + row.remaining, 0)}`, "Matches Left");
+
+  const listY = statY + boxH + gap + 26;
+  ctx.fillStyle = "#65736f";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText("RACE TABLE", panelX + gap, listY - 8);
+  drawRaceRows(ctx, league, rows, panelX + gap, listY + 18, panelW - gap * 2, panelY + panelH - listY - gap - 16);
+
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `${slugify(`${labels[raceKey] || "race"}-${league.name}`)}.png`;
+  link.click();
+}
+
+function renderTextGraphic(title, eyebrow, lines, name) {
+  const scale = 2;
+  const format = els.graphicFormatInput?.value || "default";
+  const size = format === "story" ? [720, 1280] : format === "square" ? [1080, 1080] : [1100, 760];
+  const [width, height] = size;
+  const canvas = document.createElement("canvas");
+  canvas.width = width * scale;
+  canvas.height = height * scale;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+  ctx.fillStyle = "#f7faf8";
+  ctx.fillRect(0, 0, width, height);
+  ctx.fillStyle = "#0c5c35";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText(eyebrow.toUpperCase(), 48, 64);
+  ctx.fillStyle = "#17211f";
+  ctx.font = "900 40px Inter, Arial, sans-serif";
+  drawFittedText(ctx, title, 48, 112, width - 96, 40);
+  drawRoundRect(ctx, 48, 150, width - 96, height - 198, 8, "rgba(255,255,255,.92)", "#d7dfdc");
+  ctx.font = "800 22px Inter, Arial, sans-serif";
+  lines.forEach((line, index) => {
+    const y = 205 + index * 46;
+    if (y > height - 80) return;
+    ctx.fillStyle = index % 2 ? "#ffffff" : "#f1f6f4";
+    ctx.fillRect(68, y - 28, width - 136, 38);
+    ctx.fillStyle = "#17211f";
+    drawFittedText(ctx, line, 88, y, width - 176, 22);
+  });
+  const link = document.createElement("a");
+  link.href = canvas.toDataURL("image/png");
+  link.download = `${slugify(`${name}-${title}`)}.png`;
+  link.click();
+}
+
+function drawGraphicBackdrop(ctx, width, height) {
+  ctx.fillStyle = "#f7faf8";
+  ctx.fillRect(0, 0, width, height);
+  const greenGlow = ctx.createRadialGradient(0, 0, 40, 0, 0, 580);
+  greenGlow.addColorStop(0, "rgba(23, 114, 69, 0.14)");
+  greenGlow.addColorStop(1, "rgba(23, 114, 69, 0)");
+  ctx.fillStyle = greenGlow;
+  ctx.fillRect(0, 0, width, height);
+  const blueGlow = ctx.createRadialGradient(width, height, 40, width, height, 620);
+  blueGlow.addColorStop(0, "rgba(35, 90, 151, 0.13)");
+  blueGlow.addColorStop(1, "rgba(35, 90, 151, 0)");
+  ctx.fillStyle = blueGlow;
+  ctx.fillRect(0, 0, width, height);
+}
+
+function raceGraphicRows(league, table, raceKey) {
+  const automaticCutoff = countQualification(league, "automatic") || Math.min(2, table.length);
+  const playoffCutoff = automaticCutoff + countQualification(league, "playoff") || Math.min(6, table.length);
+  const relegationCount = countQualification(league, "relegation");
+  let rows = table;
+  if (raceKey === "title") rows = table.slice(0, Math.min(6, table.length));
+  if (raceKey === "automatic") rows = table.slice(0, Math.max(automaticCutoff + 4, 6));
+  if (raceKey === "playoff") rows = table.slice(0, Math.max(playoffCutoff + 3, 8));
+  if (raceKey === "survival" && relegationCount) rows = table.slice(Math.max(0, table.length - relegationCount - 5));
+  return rows.map((row) => ({
+    teamName: row.team.name,
+    position: row.position + 1,
+    points: row.points,
+    diff: row.diff,
+    form: row.form || [],
+    remaining: remainingMatchesForTeam(league, row.teamId),
+    next: nextFixtureForTeam(league, row.teamId),
+  }));
+}
+
+function drawRaceSummaryBox(ctx, x, y, width, height, value, label = "") {
+  drawRoundRect(ctx, x, y, width, height, 8, "#f7faf8", "#d7dfdc");
+  ctx.fillStyle = "#17211f";
+  ctx.font = "900 24px Inter, Arial, sans-serif";
+  ctx.textAlign = "center";
+  drawCenteredFittedText(ctx, value, x + width / 2, y + height / 2 - 2, width - 28, 24);
+  if (label) {
+    ctx.fillStyle = "#65736f";
+    ctx.font = "900 13px Inter, Arial, sans-serif";
+    drawCenteredFittedText(ctx, label, x + width / 2, y + height - 24, width - 20, 13);
+  }
+  ctx.textAlign = "left";
+}
+
+function drawRaceRows(ctx, league, rows, x, y, width, maxHeight) {
+  if (!rows.length) {
+    ctx.fillStyle = "#65736f";
+    ctx.font = "800 18px Inter, Arial, sans-serif";
+    ctx.fillText("No race data available yet.", x, y + 28);
+    return;
+  }
+  const compact = width < 760;
+  const formX = x + width - (compact ? 330 : 520);
+  const pointsX = x + width - (compact ? 205 : 350);
+  const leftX = x + width - (compact ? 112 : 190);
+  const gdX = x + width - 30;
+  ctx.fillStyle = "#65736f";
+  ctx.font = "900 11px Inter, Arial, sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillText("FORM", formX, y - 8);
+  ctx.textAlign = "right";
+  ctx.fillText("PTS", pointsX, y - 8);
+  ctx.fillText("LEFT", leftX, y - 8);
+  ctx.fillText("GD", gdX, y - 8);
+  ctx.textAlign = "left";
+  const rowHeight = Math.min(66, Math.max(34, Math.floor((maxHeight - 12) / rows.length)));
+  rows.forEach((row, index) => {
+    const rowY = y + 8 + index * rowHeight;
+    if (rowY + rowHeight > y + maxHeight) return;
+    ctx.fillStyle = index % 2 ? "#ffffff" : "#f1f6f4";
+    ctx.fillRect(x, rowY, width, rowHeight - 8);
+    drawRoundRect(ctx, x + 12, rowY + 11, 36, 32, 8, "#177245", "#177245");
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 14px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(String(row.position), x + 30, rowY + 32);
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#17211f";
+    ctx.font = "900 17px Inter, Arial, sans-serif";
+    drawFittedText(ctx, row.teamName, x + 62, rowY + 25, Math.max(190, formX - x - 92), 17);
+    ctx.fillStyle = "#65736f";
+    ctx.font = "800 11px Inter, Arial, sans-serif";
+    const nextText = row.next ? `Next: ${plainTeamName(league, row.next.homeId)} v ${plainTeamName(league, row.next.awayId)}` : "No fixture left";
+    drawFittedText(ctx, nextText, x + 62, rowY + 43, Math.max(190, formX - x - 92), 11);
+    drawMiniFormDots(ctx, row.form.slice(-4), formX, rowY + 34);
+    ctx.fillStyle = "#17211f";
+    ctx.font = "900 16px Inter, Arial, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(String(row.points), pointsX, rowY + 28);
+    ctx.fillText(String(row.remaining), leftX, rowY + 28);
+    ctx.fillStyle = "#65736f";
+    ctx.font = "900 13px Inter, Arial, sans-serif";
+    ctx.fillText(`${row.diff >= 0 ? "+" : ""}${row.diff}`, gdX, rowY + 28);
+    ctx.textAlign = "left";
+  });
+}
+
+function drawMiniFormDots(ctx, form, x, y) {
+  const dots = form.length ? form : ["-", "-", "-", "-"];
+  dots.forEach((result, index) => {
+    const color = result === "W" ? "#177245" : result === "D" ? "#9aa7a3" : result === "L" ? "#b83931" : "#d7dfdc";
+    drawRoundRect(ctx, x + index * 21, y - 18, 17, 17, 9, color, color);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 8px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(result, x + index * 21 + 8.5, y - 6);
+  });
+  ctx.textAlign = "left";
+}
+
+function drawTeamStatBox(ctx, x, y, width, height, value, label, color) {
+  drawRoundRect(ctx, x, y, width, height, 8, "#f7faf8", "#d7dfdc");
+  ctx.fillStyle = color;
+  ctx.font = `900 ${height > 160 ? 68 : 62}px Inter, Arial, sans-serif`;
+  ctx.textAlign = "center";
+  if (ctx.measureText(value).width > width - 36) {
+    ctx.textAlign = "left";
+    drawFittedText(ctx, value, x + 18, y + height / 2 + 12, width - 36, height > 160 ? 68 : 62);
+    ctx.textAlign = "center";
+  } else {
+    ctx.fillText(value, x + width / 2, y + height / 2 + 12);
+  }
+  ctx.fillStyle = "#65736f";
+  ctx.font = "900 18px Inter, Arial, sans-serif";
+  ctx.fillText(label, x + width / 2, y + height - 26);
+  ctx.textAlign = "left";
+}
+
+function drawRecordBox(ctx, x, y, width, height, row) {
+  drawRoundRect(ctx, x, y, width, height, 8, "#f7faf8", "#d7dfdc");
+  const labels = [["Wins", row.won], ["Draws", row.drawn], ["Losses", row.lost]];
+  ctx.font = "800 24px Inter, Arial, sans-serif";
+  labels.forEach(([label, value], index) => {
+    const lineY = y + 42 + index * 30;
+    ctx.fillStyle = "#17211f";
+    ctx.textAlign = "left";
+    ctx.fillText(label, x + 28, lineY);
+    ctx.textAlign = "right";
+    ctx.fillText(String(value), x + width - 28, lineY);
+  });
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#65736f";
+  ctx.font = "900 18px Inter, Arial, sans-serif";
+  ctx.fillText("Record", x + width / 2, y + height - 26);
+  ctx.textAlign = "left";
+}
+
+function drawFormBox(ctx, x, y, width, height, form) {
+  drawRoundRect(ctx, x, y, width, height, 8, "#f7faf8", "#d7dfdc");
+  const dots = form.length ? form : ["-", "-", "-", "-"];
+  const dotSize = 34;
+  const totalWidth = dots.length * dotSize + (dots.length - 1) * 10;
+  let dotX = x + (width - totalWidth) / 2;
+  const dotY = y + height / 2 - 22;
+  dots.forEach((result) => {
+    const color = result === "W" ? "#177245" : result === "D" ? "#9aa7a3" : result === "L" ? "#b83931" : "#d7dfdc";
+    drawRoundRect(ctx, dotX, dotY, dotSize, dotSize, 17, color, color);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 15px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(result, dotX + dotSize / 2, dotY + 22);
+    dotX += dotSize + 10;
+  });
+  ctx.fillStyle = "#65736f";
+  ctx.font = "900 18px Inter, Arial, sans-serif";
+  ctx.fillText("Form", x + width / 2, y + height - 26);
+  ctx.textAlign = "left";
+}
+
+function recentTeamMatches(league, teamId, limit) {
+  return league.fixtures
+    .filter((fixture) => fixture.played && (fixture.homeId === teamId || fixture.awayId === teamId))
+    .sort((a, b) => a.gameweek - b.gameweek)
+    .slice(-limit);
+}
+
+function drawRecentMatches(ctx, league, teamId, matches, x, y, width, maxHeight) {
+  if (!matches.length) {
+    ctx.fillStyle = "#65736f";
+    ctx.font = "800 18px Inter, Arial, sans-serif";
+    ctx.fillText("No completed matches yet.", x, y + 28);
+    return;
+  }
+  const rowHeight = Math.min(48, Math.max(30, Math.floor(maxHeight / matches.length)));
+  matches.forEach((fixture, index) => {
+    const rowY = y + index * rowHeight;
+    if (rowY + rowHeight > y + maxHeight) return;
+    const isHome = fixture.homeId === teamId;
+    const opponentId = isHome ? fixture.awayId : fixture.homeId;
+    const scored = isHome ? fixture.homeScore : fixture.awayScore;
+    const conceded = isHome ? fixture.awayScore : fixture.homeScore;
+    const result = scored > conceded ? "W" : scored === conceded ? "D" : "L";
+    const color = result === "W" ? "#177245" : result === "D" ? "#9aa7a3" : "#b83931";
+    ctx.fillStyle = index % 2 ? "#ffffff" : "#f1f6f4";
+    ctx.fillRect(x, rowY, width, rowHeight - 6);
+    drawRoundRect(ctx, x + 12, rowY + 8, 32, 26, 8, color, color);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 13px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(result, x + 28, rowY + 26);
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#65736f";
+    ctx.font = "800 12px Inter, Arial, sans-serif";
+    ctx.fillText(`GW ${fixture.gameweek || 1}`, x + 58, rowY + 26);
+    ctx.fillStyle = "#17211f";
+    ctx.font = "900 16px Inter, Arial, sans-serif";
+    drawFittedText(ctx, plainTeamName(league, opponentId), x + 112, rowY + 26, width - 260, 16);
+    ctx.textAlign = "right";
+    ctx.fillText(`${scored} - ${conceded}`, x + width - 18, rowY + 26);
+    ctx.textAlign = "left";
+  });
+}
+
+function ordinal(value) {
+  const number = Number(value) || 0;
+  const teen = number % 100;
+  if (teen >= 11 && teen <= 13) return `${number}th`;
+  return `${number}${{ 1: "st", 2: "nd", 3: "rd" }[number % 10] || "th"}`;
+}
+
 function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke = "") {
   const r = Math.min(radius, width / 2, height / 2);
   ctx.beginPath();
@@ -1309,6 +2511,22 @@ function drawFittedText(ctx, text, x, y, maxWidth, fontSize) {
   ctx.fillText(`${output}...`, x, y);
 }
 
+function drawCenteredFittedText(ctx, text, x, y, maxWidth) {
+  const originalAlign = ctx.textAlign;
+  const value = String(text);
+  if (ctx.measureText(value).width <= maxWidth) {
+    ctx.fillText(value, x, y);
+    ctx.textAlign = originalAlign;
+    return;
+  }
+  let output = value;
+  while (output.length > 1 && ctx.measureText(`${output}...`).width > maxWidth) {
+    output = output.slice(0, -1);
+  }
+  ctx.fillText(`${output}...`, x, y);
+  ctx.textAlign = originalAlign;
+}
+
 function graphicLegendItems(rows) {
   const seen = new Map();
   rows.forEach((row) => {
@@ -1341,6 +2559,9 @@ function updateTeam(league, teamId, positionIndex, control) {
   if (control.dataset.field === "name") {
     team.name = control.value.trim() || "Unnamed Team";
   }
+  if (control.dataset.field === "color") {
+    team.color = control.value;
+  }
   if (control.dataset.field === "qualification") {
     const rule = positionRule(league, positionIndex);
     if (control.value === "relegationPlayoff" && countQualification(league, "relegationPlayoff") >= 2 && rule.qualification !== "relegationPlayoff") {
@@ -1361,6 +2582,8 @@ function handleTeamAction(league, teamId, action) {
   const index = league.teams.findIndex((team) => team.id === teamId);
   if (index < 0) return;
   if (action === "remove") {
+    const hasFixtures = league.fixtures.some((fixture) => fixture.homeId === teamId || fixture.awayId === teamId);
+    if (hasFixtures && !confirm(`Remove ${league.teams[index].name}? This team has fixtures scheduled and those fixtures will be removed.`)) return;
     league.teams.splice(index, 1);
     ensurePositionRules(league);
     league.fixtures = league.fixtures.filter((fixture) => fixture.homeId !== teamId && fixture.awayId !== teamId);
@@ -1392,6 +2615,32 @@ function addTeam() {
   resetBrackets(league);
   setUpdated(league);
   saveState();
+  render();
+}
+
+function bulkAddTeams() {
+  els.bulkTeamsInput.value = "";
+  els.bulkTeamsDialog.showModal();
+}
+
+function confirmBulkTeams() {
+  const league = selectedLeague();
+  if (!league) return;
+  const names = els.bulkTeamsInput.value.split(/\r?\n/).map((name) => name.trim()).filter(Boolean);
+  if (!names.length) {
+    notify("Paste at least one team name.", "warn");
+    return;
+  }
+  names.forEach((name) => {
+    const team = defaultTeam(league.teams.length);
+    team.name = name;
+    league.teams.push(team);
+  });
+  ensurePositionRules(league);
+  resetBrackets(league);
+  setUpdated(league);
+  saveState();
+  notify(`Added ${names.length} team${names.length === 1 ? "" : "s"}.`, "success");
   render();
 }
 
@@ -1439,6 +2688,14 @@ function updateSeasonName(value) {
   saveState();
   const league = selectedLeague();
   if (league) renderCleanTable(league);
+}
+
+function updateGroupField(field, value) {
+  const group = selectedGroup();
+  if (!group) return;
+  group[field] = value;
+  saveState();
+  if (state.activeView === "dashboard") renderDashboard();
 }
 
 function addLeague() {
@@ -1501,10 +2758,35 @@ function deleteLeague() {
 function generateFixtures() {
   const league = selectedLeague();
   if (!league) return;
+  if (league.fixtures.length && !confirm("Regenerate fixtures? This will replace all current fixtures and scores.")) return;
   league.fixtureMode = els.fixtureModeInput.value;
   league.fixtures = buildRoundRobin(league.teams.map((team) => team.id), league.fixtureMode);
   setUpdated(league);
   saveState();
+  render();
+}
+
+function resetLeague(keepTeams) {
+  const league = selectedLeague();
+  if (!league) return;
+  const message = keepTeams ? "Reset this league but keep all teams?" : "Reset this league and replace teams with a fresh default set?";
+  if (!confirm(message)) return;
+  if (!keepTeams) {
+    league.teams = Array.from({ length: 12 }, (_, index) => defaultTeam(index));
+    league.positionRules = Array.from({ length: 12 }, (_, index) => defaultPositionRule(index));
+  }
+  league.teams.forEach((team) => {
+    team.manual = { played: 0, won: 0, drawn: 0, lost: 0, for: 0, against: 0, diff: 0, points: 0 };
+  });
+  league.fixtures = [];
+  league.pointDeductions = {};
+  league.playoffs = createBracket("promotion");
+  league.relegationPlayoff = createBracket("relegation");
+  league.status = "active";
+  ensurePositionRules(league);
+  setUpdated(league);
+  saveState();
+  notify("League reset.", "success");
   render();
 }
 
@@ -1534,7 +2816,7 @@ function buildRoundRobin(teamIds, mode) {
 }
 
 function createFixture(gameweek, homeId, awayId) {
-  return { id: createId("fixture"), gameweek, homeId, awayId, homeScore: null, awayScore: null, played: false };
+  return { id: createId("fixture"), gameweek, homeId, awayId, date: "", homeScore: null, awayScore: null, played: false };
 }
 
 function nextGameweek(league) {
@@ -1552,16 +2834,69 @@ function addManualFixture() {
     return;
   }
   league.fixtures.push(createFixture(gameweek, homeId, awayId));
+  league.fixtures.at(-1).date = els.manualDateInput.value || "";
   league.fixtures.sort((a, b) => a.gameweek - b.gameweek);
   setUpdated(league);
   saveState();
   render();
 }
 
+function openGameweekDateDialog() {
+  const league = selectedLeague();
+  if (!league || league.fixtures.length === 0) {
+    notify("Create fixtures before setting a gameweek date.", "warn");
+    return;
+  }
+  const weeks = [...new Set(league.fixtures.map((fixture) => fixture.gameweek))].sort((a, b) => a - b);
+  els.gameweekDateSelect.innerHTML = weeks
+    .map((week) => `<option value="${week}">Gameweek ${week}</option>`)
+    .join("");
+  const preferredWeek = state.fixtureFilter !== "all" && weeks.includes(Number(state.fixtureFilter))
+    ? Number(state.fixtureFilter)
+    : weeks[0];
+  els.gameweekDateSelect.value = String(preferredWeek);
+  const existingDates = league.fixtures
+    .filter((fixture) => fixture.gameweek === preferredWeek && fixture.date)
+    .map((fixture) => fixture.date);
+  els.gameweekDateInput.value = existingDates[0] || "";
+  els.gameweekDateDialog.showModal();
+}
+
+function syncGameweekDateInput() {
+  const league = selectedLeague();
+  const gameweek = Number(els.gameweekDateSelect.value);
+  if (!league || !gameweek) return;
+  const existing = league.fixtures.find((fixture) => fixture.gameweek === gameweek && fixture.date);
+  els.gameweekDateInput.value = existing?.date || "";
+}
+
+function applyGameweekDate() {
+  const league = selectedLeague();
+  const date = els.gameweekDateInput.value;
+  const gameweek = Number(els.gameweekDateSelect.value);
+  if (!league || !date || !gameweek) {
+    notify("Choose a specific gameweek and a date first.", "warn");
+    return;
+  }
+  league.fixtures.forEach((fixture) => {
+    if (fixture.gameweek === gameweek) fixture.date = date;
+  });
+  setUpdated(league);
+  saveState();
+  notify(`Gameweek ${gameweek} dates updated.`, "success");
+  renderFixtures(league);
+}
+
 function updateFixture(league, fixtureId, control) {
   const fixture = league.fixtures.find((item) => item.id === fixtureId);
   if (!fixture) return;
   const value = control.value === "" ? null : Number(control.value);
+  if (control.dataset.date === "fixture") {
+    fixture.date = control.value;
+    setUpdated(league);
+    saveState();
+    return;
+  }
   if (control.dataset.score === "home") fixture.homeScore = value;
   if (control.dataset.score === "away") fixture.awayScore = value;
   fixture.played = Number.isFinite(fixture.homeScore) && Number.isFinite(fixture.awayScore);
@@ -1575,6 +2910,7 @@ function clearFixture(league, fixtureId) {
   if (!fixture) return;
   fixture.homeScore = null;
   fixture.awayScore = null;
+  fixture.date = "";
   fixture.played = false;
   setUpdated(league);
   saveState();
@@ -1617,6 +2953,7 @@ function autoPlayoff(kind) {
     let high = entrants.length - 1;
     while (low < high) {
       bracket.matches.push(createPlayoffMatch("Round 1", entrants[low].id, entrants[high].id, 1));
+      if (league.twoLegPlayoffs) bracket.matches.push(createPlayoffMatch("Round 1 Leg 2", entrants[high].id, entrants[low].id, 1));
       low += 1;
       high -= 1;
     }
@@ -1771,6 +3108,8 @@ function createSeasonSnapshot(group, leagues) {
   return {
     id: createId("season"),
     name: group.seasonName || "Season",
+    seasonStart: group.seasonStart || "",
+    seasonEnd: group.seasonEnd || "",
     createdAt: new Date().toISOString(),
     leagues: leagues.map((league) => {
       const table = tableWithRules(league);
@@ -1891,9 +3230,20 @@ function escapeAttribute(value) {
 function bindEvents() {
   els.enterCreatorButton.addEventListener("click", () => showPage("creator"));
   els.openChangelogButton.addEventListener("click", () => showPage("changelog"));
+  els.openNewsButton.addEventListener("click", () => {
+    clearHash();
+    showPage("news");
+  });
   els.backHomeButton.addEventListener("click", () => showPage("home"));
+  els.newsBackHomeButton.addEventListener("click", () => {
+    clearHash();
+    showPage("home");
+  });
   els.homeNavButton.addEventListener("click", () => showPage("home"));
   els.changelogNavButton.addEventListener("click", () => showPage("changelog"));
+  els.darkModeButton.addEventListener("click", toggleDarkMode);
+  els.sharedLeagueTab.addEventListener("click", () => setSharedTab("league"));
+  els.sharedFixturesTab.addEventListener("click", () => setSharedTab("fixtures"));
   els.newLeagueButton.addEventListener("click", addLeague);
   els.emptyCreateButton.addEventListener("click", addLeague);
   els.newGroupButton.addEventListener("click", addGroup);
@@ -1904,12 +3254,42 @@ function bindEvents() {
   els.exportButton.addEventListener("click", exportJson);
   els.importInput.addEventListener("change", (event) => importJson(event.target.files[0]));
   els.addTeamButton.addEventListener("click", addTeam);
+  els.bulkAddTeamsButton.addEventListener("click", bulkAddTeams);
   els.generateFixturesButton.addEventListener("click", generateFixtures);
+  els.resetKeepTeamsButton.addEventListener("click", () => resetLeague(true));
+  els.resetAllButton.addEventListener("click", () => resetLeague(false));
   els.addManualFixtureButton.addEventListener("click", addManualFixture);
   els.renderGraphicButton.addEventListener("click", renderLeagueGraphic);
+  els.generateShareCodeButton.addEventListener("click", generateShareCode);
+  els.copyShareLinkButton.addEventListener("click", () => copyShareUrl());
+  els.shareModeInput.addEventListener("change", () => {
+    const league = selectedLeague();
+    if (league) renderShareTeamOptions(league);
+  });
+  els.fixtureGameweekFilter.addEventListener("change", (event) => {
+    state.fixtureFilter = event.target.value;
+    renderFixtures(selectedLeague());
+  });
+  els.fixtureCalendarButton.addEventListener("click", () => {
+    state.fixtureCalendarMode = !state.fixtureCalendarMode;
+    renderFixtures(selectedLeague());
+  });
+  els.applyGameweekDateButton.addEventListener("click", openGameweekDateDialog);
+  els.renderGameweekButton.addEventListener("click", () => renderGameweekGraphic());
+  els.renderLeagueGraphic2Button.addEventListener("click", renderLeagueGraphic);
+  els.renderPlayoffsGraphicButton.addEventListener("click", renderPlayoffsGraphic);
+  els.renderTeamGraphicButton.addEventListener("click", renderTeamGraphic);
+  els.renderRaceGraphicButton.addEventListener("click", renderRaceGraphic);
+  els.renderGameweekGraphic2Button.addEventListener("click", () => renderGameweekGraphic());
   els.autoPlayoffButton.addEventListener("click", () => autoPlayoff("playoff"));
   els.autoRelegationPlayoffButton.addEventListener("click", () => autoPlayoff("relegation"));
   document.querySelectorAll(".tab-button").forEach((button) => button.addEventListener("click", () => {
+    if (button.dataset.race) {
+      state.activeRaceView = button.dataset.race;
+      document.querySelectorAll("[data-race]").forEach((raceButton) => raceButton.classList.toggle("active", raceButton.dataset.race === state.activeRaceView));
+      renderProjections(selectedLeague());
+      return;
+    }
     state.activeView = button.dataset.view;
     render();
   }));
@@ -1917,12 +3297,16 @@ function bindEvents() {
     state.selectedGroupId = event.target.value;
     state.selectedLeagueId = filteredLeagues()[0]?.id || "";
     state.activeCleanSeasonId = "current";
+    state.cleanRewindWeek = "";
     saveState();
     render();
   });
   els.seasonNameInput.addEventListener("change", (event) => updateSeasonName(event.target.value));
+  els.seasonStartInput.addEventListener("change", (event) => updateGroupField("seasonStart", event.target.value));
+  els.seasonEndInput.addEventListener("change", (event) => updateGroupField("seasonEnd", event.target.value));
   els.cleanSeasonInput.addEventListener("change", (event) => {
     state.activeCleanSeasonId = event.target.value;
+    state.cleanRewindWeek = "";
     saveState();
     const league = selectedLeague();
     if (league) renderCleanTable(league);
@@ -1934,7 +3318,19 @@ function bindEvents() {
   els.promotesToInput.addEventListener("change", (event) => updateLeagueField("promotesTo", event.target.value));
   els.relegatesToInput.addEventListener("change", (event) => updateLeagueField("relegatesTo", event.target.value));
   els.pointLabelInput.addEventListener("input", (event) => updateLeagueField("pointLabel", event.target.value.trim() || "Point", false));
+  els.teamColorsInput.addEventListener("change", (event) => updateLeagueField("showTeamColors", event.target.value === "on"));
+  els.twoLegPlayoffInput.addEventListener("change", (event) => updateLeagueField("twoLegPlayoffs", event.target.checked));
   els.fixtureModeInput.addEventListener("change", (event) => updateLeagueField("fixtureMode", event.target.value));
+  els.historySeasonInput.addEventListener("change", () => renderHistory(selectedLeague()));
+  els.historyTeamInput.addEventListener("change", () => renderHistory(selectedLeague()));
+  els.rewindGameweekInput.addEventListener("change", renderRewindTable);
+  els.bulkTeamsDialog.addEventListener("close", () => {
+    if (els.bulkTeamsDialog.returnValue === "save") confirmBulkTeams();
+  });
+  els.gameweekDateDialog.addEventListener("close", () => {
+    if (els.gameweekDateDialog.returnValue === "save") applyGameweekDate();
+  });
+  els.gameweekDateSelect.addEventListener("change", syncGameweekDateInput);
   els.customDialog.addEventListener("close", () => {
     const league = selectedLeague();
     if (!league || state.pendingCustomPosition < 0) return;
@@ -1952,6 +3348,12 @@ function bindEvents() {
   });
   els.rolloverDialog.addEventListener("close", () => {
     if (els.rolloverDialog.returnValue === "confirm") confirmSeasonRollover();
+  });
+  window.addEventListener("hashchange", () => {
+    if (!maybeRenderSharedPage() && !maybeRenderNewsPage()) showPage("home");
+  });
+  window.addEventListener("popstate", () => {
+    if (!maybeRenderSharedPage() && !maybeRenderNewsPage()) showPage("home");
   });
 }
 
@@ -1989,3 +3391,4 @@ function updateLeagueField(field, value, rerender = true) {
 
 loadState();
 bindEvents();
+if (!maybeRenderSharedPage()) maybeRenderNewsPage();
