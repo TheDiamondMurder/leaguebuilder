@@ -21,6 +21,14 @@ const state = {
 };
 
 const els = {
+  homePage: document.querySelector("#homePage"),
+  creatorPage: document.querySelector("#creatorPage"),
+  changelogPage: document.querySelector("#changelogPage"),
+  enterCreatorButton: document.querySelector("#enterCreatorButton"),
+  openChangelogButton: document.querySelector("#openChangelogButton"),
+  backHomeButton: document.querySelector("#backHomeButton"),
+  homeNavButton: document.querySelector("#homeNavButton"),
+  changelogNavButton: document.querySelector("#changelogNavButton"),
   groupSelect: document.querySelector("#groupSelect"),
   renameGroupButton: document.querySelector("#renameGroupButton"),
   deleteGroupButton: document.querySelector("#deleteGroupButton"),
@@ -88,6 +96,13 @@ const els = {
     deductions: document.querySelector("#deductionsView"),
   },
 };
+
+function showPage(page) {
+  els.homePage.hidden = page !== "home";
+  els.creatorPage.hidden = page !== "creator";
+  els.changelogPage.hidden = page !== "changelog";
+  if (page === "creator") render();
+}
 
 function createId(prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -1126,92 +1141,172 @@ function renderLeagueGraphic() {
       status: mathematicalStatus(league, currentTable, row, index),
       playoffBadge: playoffMovementBadge(league, row.teamId).includes("badge-promoted") ? "P" : playoffMovementBadge(league, row.teamId).includes("badge-relegated") ? "R" : "",
     }));
-  const title = snapshotLeague ? `${snapshotLeague.name} - ${snapshotLeague.seasonName}` : `${league.name} - ${selectedGroup()?.seasonName || "Current Season"}`;
+  const title = snapshotLeague ? snapshotLeague.name : league.name;
+  const eyebrow = snapshotLeague ? snapshotLeague.seasonName : selectedGroup()?.seasonName || "Current Season";
   const legend = graphicLegendItems(rows);
   const deductionNotes = snapshotLeague ? plainDeductionNotesFromSnapshot(snapshotLeague) : deductionNotesFor(league, currentTable);
-  const width = 1100;
-  const rowHeight = 44;
-  const topOffset = 190 + (legend.length ? 34 : 0);
-  const notesHeight = deductionNotes.length ? 30 + deductionNotes.length * 22 : 0;
-  const height = topOffset + rows.length * rowHeight + notesHeight + 30;
+  const scale = 2;
+  const width = 1120;
+  const margin = 48;
+  const rowHeight = 42;
+  const headerHeight = 36;
+  const titleBlockHeight = 106;
+  const legendHeight = legend.length ? 38 : 0;
+  const notesHeight = deductionNotes.length ? 28 + deductionNotes.length * 20 : 0;
+  const panelTop = margin + titleBlockHeight;
+  const panelHeight = 28 + legendHeight + headerHeight + rows.length * rowHeight + notesHeight + 26;
+  const height = panelTop + panelHeight + margin;
+  const panelX = margin;
+  const panelY = panelTop;
+  const panelW = width - margin * 2;
   const canvas = document.createElement("canvas");
-  canvas.width = width;
-  canvas.height = height;
+  canvas.width = width * scale;
+  canvas.height = height * scale;
   const ctx = canvas.getContext("2d");
+  ctx.scale(scale, scale);
+
   ctx.fillStyle = "#f7faf8";
   ctx.fillRect(0, 0, width, height);
-  ctx.fillStyle = "#177245";
-  ctx.fillRect(0, 0, width, 92);
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "800 34px Inter, Arial, sans-serif";
-  ctx.fillText(title, 42, 56);
+  const greenGlow = ctx.createRadialGradient(0, 0, 40, 0, 0, 580);
+  greenGlow.addColorStop(0, "rgba(23, 114, 69, 0.14)");
+  greenGlow.addColorStop(1, "rgba(23, 114, 69, 0)");
+  ctx.fillStyle = greenGlow;
+  ctx.fillRect(0, 0, width, height);
+  const blueGlow = ctx.createRadialGradient(width, height, 40, width, height, 620);
+  blueGlow.addColorStop(0, "rgba(35, 90, 151, 0.13)");
+  blueGlow.addColorStop(1, "rgba(35, 90, 151, 0)");
+  ctx.fillStyle = blueGlow;
+  ctx.fillRect(0, 0, width, height);
+
+  ctx.fillStyle = "#0c5c35";
+  ctx.font = "900 13px Inter, Arial, sans-serif";
+  ctx.fillText(String(eyebrow).toUpperCase(), margin, 66);
+  ctx.fillStyle = "#17211f";
+  ctx.font = "900 42px Inter, Arial, sans-serif";
+  drawFittedText(ctx, title, margin, 112, width - margin * 2, 42);
+
+  drawRoundRect(ctx, panelX, panelY, panelW, panelHeight, 8, "rgba(255, 255, 255, 0.92)", "#d7dfdc");
 
   const columns = [
-    ["#", 42, 46],
-    ["Team", 98, 360],
-    ["P", 480, 52],
-    ["W", 545, 52],
-    ["D", 610, 52],
-    ["L", 675, 52],
-    ["F", 740, 52],
-    ["A", 805, 52],
-    ["Diff", 870, 70],
-    ["Pts", 955, 70],
+    ["#", panelX + 22, 44],
+    ["Team", panelX + 82, 350],
+    ["P", panelX + 478, 46],
+    ["W", panelX + 536, 46],
+    ["D", panelX + 594, 46],
+    ["L", panelX + 652, 46],
+    ["F", panelX + 710, 48],
+    ["A", panelX + 770, 48],
+    ["Diff", panelX + 830, 64],
+    ["Pts", panelX + 920, 56],
   ];
+
+  let cursorY = panelY + 22;
   if (legend.length) {
-    let x = 42;
-    const y = 112;
+    let x = panelX + 22;
+    const y = cursorY + 16;
     legend.forEach((item) => {
+      const chipW = Math.min(210, 42 + item.label.length * 7.5);
+      drawRoundRect(ctx, x, y - 18, chipW, 26, 8, "#f7faf8", "#d7dfdc");
       ctx.fillStyle = item.color;
-      ctx.fillRect(x, y - 12, 16, 16);
-      ctx.fillStyle = "#17211f";
-      ctx.font = "800 13px Inter, Arial, sans-serif";
-      ctx.fillText(item.label, x + 24, y + 2);
-      x += Math.min(240, 42 + item.label.length * 8);
+      ctx.fillRect(x + 10, y - 10, 12, 12);
+      ctx.fillStyle = "#65736f";
+      ctx.font = "800 12px Inter, Arial, sans-serif";
+      drawFittedText(ctx, item.label, x + 30, y, chipW - 38, 12);
+      x += chipW + 8;
     });
+    cursorY += legendHeight;
   }
-  const headerY = topOffset - 44;
-  ctx.fillStyle = "#dfe8e4";
-  ctx.fillRect(32, headerY - 24, width - 64, 38);
+
+  const headerY = cursorY + 24;
+  ctx.fillStyle = "#eef4f1";
+  ctx.fillRect(panelX + 14, headerY - 22, panelW - 28, headerHeight);
   ctx.fillStyle = "#17211f";
   ctx.font = "800 13px Inter, Arial, sans-serif";
   columns.forEach(([label, x]) => ctx.fillText(label, x, headerY));
+
+  const rowStartY = headerY + 34;
   rows.forEach((row, index) => {
-    const y = topOffset + index * rowHeight;
-    ctx.fillStyle = index % 2 ? "#ffffff" : "#edf2f0";
-    ctx.fillRect(32, y - 24, width - 64, rowHeight - 4);
-    ctx.fillStyle = qualificationColor(row.positionRule || defaultPositionRule(0));
-    ctx.fillRect(32, y - 24, 8, rowHeight - 4);
+    const y = rowStartY + index * rowHeight;
+    ctx.fillStyle = index % 2 ? "#ffffff" : "#f1f6f4";
+    ctx.fillRect(panelX + 14, y - 25, panelW - 28, rowHeight - 4);
+    const zoneColor = qualificationColor(row.positionRule || defaultPositionRule(0));
+    drawRoundRect(ctx, panelX + 22, y - 19, 30, 28, 8, zoneColor, zoneColor);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "900 14px Inter, Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(String(index + 1), panelX + 37, y);
+    ctx.textAlign = "left";
     ctx.fillStyle = "#17211f";
     ctx.font = "800 16px Inter, Arial, sans-serif";
-    ctx.fillText(String(index + 1), 48, y + 2);
-    ctx.fillText(row.teamName, 98, y + 2);
+    drawFittedText(ctx, row.teamName, columns[1][1], y, 300, 16);
     if (row.playoffBadge) {
       ctx.fillStyle = row.playoffBadge === "P" ? "#177245" : "#b83931";
-      ctx.fillRect(412, y - 17, 22, 22);
+      drawRoundRect(ctx, panelX + 406, y - 17, 22, 22, 6, ctx.fillStyle, ctx.fillStyle);
       ctx.fillStyle = "#ffffff";
       ctx.font = "900 13px Inter, Arial, sans-serif";
-      ctx.fillText(row.playoffBadge, 419, y - 1);
+      ctx.textAlign = "center";
+      ctx.fillText(row.playoffBadge, panelX + 417, y - 1);
+      ctx.textAlign = "left";
       ctx.fillStyle = "#17211f";
     }
     ctx.font = "700 15px Inter, Arial, sans-serif";
+    ctx.fillStyle = "#17211f";
     [row.played, row.won, row.drawn, row.lost, row.for, row.against, row.diff, row.points].forEach((value, valueIndex) => {
       ctx.fillText(String(value), columns[valueIndex + 2][1], y + 2);
     });
   });
+
   if (deductionNotes.length) {
-    let y = topOffset + rows.length * rowHeight + 18;
+    let y = rowStartY + rows.length * rowHeight + 18;
     ctx.fillStyle = "#65736f";
     ctx.font = "700 14px Inter, Arial, sans-serif";
     deductionNotes.forEach((note) => {
-      ctx.fillText(`* ${note}`, 42, y);
+      drawFittedText(ctx, `* ${note}`, panelX + 22, y, panelW - 44, 14);
       y += 22;
     });
   }
+
   const link = document.createElement("a");
   link.href = canvas.toDataURL("image/png");
   link.download = `${slugify(title)}.png`;
   link.click();
+}
+
+function drawRoundRect(ctx, x, y, width, height, radius, fill, stroke = "") {
+  const r = Math.min(radius, width / 2, height / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height - r);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - r, y + height);
+  ctx.lineTo(x + r, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fillStyle = fill;
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.strokeStyle = stroke;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+}
+
+function drawFittedText(ctx, text, x, y, maxWidth, fontSize) {
+  const value = String(text);
+  if (ctx.measureText(value).width <= maxWidth) {
+    ctx.fillText(value, x, y);
+    return;
+  }
+  let output = value;
+  while (output.length > 1 && ctx.measureText(`${output}...`).width > maxWidth) {
+    output = output.slice(0, -1);
+  }
+  ctx.fillText(`${output}...`, x, y);
 }
 
 function graphicLegendItems(rows) {
@@ -1794,6 +1889,11 @@ function escapeAttribute(value) {
 }
 
 function bindEvents() {
+  els.enterCreatorButton.addEventListener("click", () => showPage("creator"));
+  els.openChangelogButton.addEventListener("click", () => showPage("changelog"));
+  els.backHomeButton.addEventListener("click", () => showPage("home"));
+  els.homeNavButton.addEventListener("click", () => showPage("home"));
+  els.changelogNavButton.addEventListener("click", () => showPage("changelog"));
   els.newLeagueButton.addEventListener("click", addLeague);
   els.emptyCreateButton.addEventListener("click", addLeague);
   els.newGroupButton.addEventListener("click", addGroup);
@@ -1889,4 +1989,3 @@ function updateLeagueField(field, value, rerender = true) {
 
 loadState();
 bindEvents();
-render();

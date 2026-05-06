@@ -169,6 +169,98 @@ button:hover {
   transform: translateY(-1px);
 }
 
+.page-view[hidden] {
+  display: none;
+}
+
+.home-page,
+.changelog-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 32px;
+}
+
+.home-inner,
+.changelog-inner {
+  width: min(860px, 100%);
+}
+
+.home-inner {
+  display: grid;
+  gap: 20px;
+}
+
+.home-inner h1 {
+  max-width: 720px;
+  font-size: clamp(36px, 7vw, 76px);
+  line-height: 0.95;
+  letter-spacing: 0;
+}
+
+.home-inner > p:not(.eyebrow) {
+  max-width: 620px;
+  color: var(--muted);
+  font-size: 17px;
+  font-weight: 650;
+  line-height: 1.55;
+}
+
+.home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.changelog-inner {
+  display: grid;
+  gap: 18px;
+}
+
+.changelog-card {
+  display: grid;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 12px 35px rgba(34, 48, 43, 0.08);
+}
+
+.changelog-card h3 {
+  font-size: 34px;
+}
+
+.changelog-card-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.release-date {
+  display: inline-flex;
+  align-items: center;
+  min-height: 30px;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #edf2f0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.changelog-card ul {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 20px;
+  color: var(--muted);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .sidebar-section {
   min-height: 0;
 }
@@ -1004,12 +1096,14 @@ dialog::backdrop {
   }
 
   .topbar-actions,
-  .action-group {
+  .action-group,
+  .home-actions {
     align-items: stretch;
   }
 
   .topbar-actions button,
-  .action-group button {
+  .action-group button,
+  .home-actions button {
     width: 100%;
   }
 

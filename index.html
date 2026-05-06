@@ -7,7 +7,69 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <div class="app-shell">
+    <section class="home-page page-view" id="homePage">
+      <div class="home-inner">
+        <p class="eyebrow">League Table Creator v1.2</p>
+        <h1>Build, manage, and share competition tables.</h1>
+        <p>
+          Create league pyramids, generate fixtures, track playoffs, handle season movement,
+          and export polished league graphics from one local dashboard.
+        </p>
+        <div class="home-actions">
+          <button class="primary-button" id="enterCreatorButton" type="button">Open Creator</button>
+          <button class="ghost-button" id="openChangelogButton" type="button">View Changelog</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="changelog-page page-view" id="changelogPage" hidden>
+      <div class="changelog-inner">
+        <div class="section-title-row">
+          <div>
+            <p class="eyebrow">Release notes</p>
+            <h2>Changelog</h2>
+          </div>
+          <button class="ghost-button" id="backHomeButton" type="button">Back Home</button>
+        </div>
+        <article class="changelog-card">
+          <div class="changelog-card-head">
+            <div>
+              <p class="eyebrow">Current version</p>
+              <h3>v1.2</h3>
+            </div>
+            <span class="release-date">6th April 2026</span>
+          </div>
+          <ul>
+            <li>Reworked the league graphic rendering engine with a cleaner report-card style.</li>
+            <li>Added sharper 2x PNG export for rendered league graphics.</li>
+            <li>Improved playoff bracket viewing with H2H and form-based projections.</li>
+            <li>Added point deductions, season history, projections, and richer fixture views.</li>
+          </ul>
+        </article>
+        <article class="changelog-card">
+          <div class="changelog-card-head">
+            <h3>v1.1</h3>
+            <span class="release-date">4th April 2026</span>
+          </div>
+          <ul>
+            <li>Added league rendering.</li>
+            <li>Added league groups.</li>
+            <li>Added JSON exports.</li>
+          </ul>
+        </article>
+        <article class="changelog-card">
+          <div class="changelog-card-head">
+            <h3>v1.0</h3>
+            <span class="release-date">3rd April 2026</span>
+          </div>
+          <ul>
+            <li>Initial release.</li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <div class="app-shell page-view" id="creatorPage" hidden>
       <aside class="sidebar" aria-label="Leagues">
         <div class="brand-block">
           <div class="mark" aria-hidden="true">LT</div>
@@ -58,6 +120,8 @@
             <h2 id="leagueTitle">Create your first league</h2>
           </div>
           <div class="topbar-actions">
+            <button class="ghost-button" id="homeNavButton" type="button">Home</button>
+            <button class="ghost-button" id="changelogNavButton" type="button">Changelog</button>
             <button class="ghost-button" id="exportButton" type="button">Export JSON</button>
             <label class="file-button">
               Import JSON
