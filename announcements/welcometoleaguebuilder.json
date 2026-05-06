@@ -1,0 +1,48 @@
+{
+  "slug": "welcometoleaguebuilder",
+  "title": "Welcome to LeagueBuilder",
+  "coverPhoto": "announcements/image1.svg",
+  "postDate": "2026-05-02",
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "Welcome to a brand new tool called league builder, available for free."
+    },
+    {
+      "type": "heading",
+      "text": "What is it?"
+    },
+    {
+      "type": "paragraph",
+      "text": "LeagueBuilder is a website that allows you to build league tables with as many competitors as you want, managing fixture generation, automatic league placements based on points, league tiers and much more.\n"
+    },
+    {
+      "type": "paragraph",
+      "text": "I am very excited to announce this as it is something that has been in the works for a  while."
+    },
+    {
+      "type": "heading",
+      "text": "What does it have?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Automatic league position management",
+        "League tier system",
+        "Automatic Promotion & Relegation management",
+        "Promotion Playoffs & Relegation Playoffs",
+        "Graphic rendering",
+        "Sharing league tables",
+        "Fixture scheduling"
+      ]
+    },
+    {
+      "type": "paragraph",
+      "text": "and so much more."
+    },
+    {
+      "type": "paragraph",
+      "text": "So what are you waiting for? Check it out now, completely for free!"
+    }
+  ]
+}
