@@ -1,0 +1,53 @@
+{
+  "slug": "update-v1-3",
+  "title": "Update v1.3",
+  "coverPhoto": "announcements/image2.svg",
+  "postDate": "2026-05-06",
+  "content": [
+    {
+      "type": "paragraph",
+      "text": "The first major update of LeagueBuilder is here and here is everything that has changed"
+    },
+    {
+      "type": "heading",
+      "text": "Whats new?"
+    },
+    {
+      "type": "list",
+      "items": [
+        "Added share links so other people can view your league tables.",
+        "Added QR codes for shared league links.",
+        "Added sharing for league tables, fixtures, and individual team pages.",
+        "Added team profile pages with stats, form, and fixtures.",
+        "Added bulk team adding from a pasted list.",
+        "Added optional team colours.",
+        "Added a fixture calendar view.",
+        "Added gameweek filters for fixtures.",
+        "Added fixture dates and gameweek date tools.",
+        "Added a way to view how the league table looked before a chosen gameweek.",
+        "Added title race, promotion race, playoff race, and relegation battle views.",
+        "Added projections for what teams can achieve in their next match.",
+        "Added a clearer playoff bracket view.",
+        "Added two-leg playoff ties.",
+        "Added season history and team history.",
+        "Added a group dashboard.",
+        "Added a pyramid ladder view.",
+        "Added better season archive browsing.",
+        "Added safer reset options.",
+        "Added warnings before major actions like regenerating fixtures or deleting teams.",
+        "Added clearer pop-up messages.",
+        "Added improved dark mode.",
+        "Added better mobile controls.",
+        "Added more graphic export options, including mobile story and square post sizes.",
+        "Added new graphics for team profiles, races, fixtures, and playoffs.",
+        "Redesigned league table graphics to look cleaner and more professional.",
+        "Improved team profile graphics with position, record, points, form, and recent results.",
+        "Improved race graphics with cleaner tables and better spacing.",
+        "Improved Clean View controls.",
+        "Improved fixture history when clicking on a team.",
+        "Improved playoff promotion and relegation labels.",
+        "Fixed several display issues in tables, graphics, dates, and calendar views."
+      ]
+    }
+  ]
+}
